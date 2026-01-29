@@ -69,8 +69,8 @@ export default function Footer() {
         </div>
       </div>
       <p className="py-4 text-center border-t mt-6 border-slate-700">
-        Copyright 2025 ©{' '}
-        <a href="https://prebuiltui.com?utm_source=agentix">PrebuiltUI</a> All
+        Copyright 2025 ©{'Built with ❤️'}
+         All
         Right Reserved.
       </p>
     </motion.footer>
