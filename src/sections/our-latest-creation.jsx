@@ -43,7 +43,7 @@ export default function OurLatestCreation() {
   }, [isHovered, sectionData.length]);
 
   return (
-    <section className="flex flex-col items-center" id="creations">
+    <section className="flex flex-col items-center" id="cohorts">
       <SectionTitle
         title="Our latest cohorts"
         description="A visual collection of our most recent works - each cohort crafted with intention, hard work, and passion."

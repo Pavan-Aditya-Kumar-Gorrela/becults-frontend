@@ -1,3 +1,4 @@
+import { Routes, Route } from 'react-router-dom';
 import GetInTouch from './sections/get-in-touch';
 import OurTestimonials from './sections/our-testimonials';
 import SubscribeNewsletter from './sections/subscribe-newsletter';
@@ -7,8 +8,11 @@ import Navbar from './components/navbar';
 import AboutOurApps from './sections/about-our-apps';
 import HeroSection from './sections/hero-section';
 import OurLatestCreation from './sections/our-latest-creation';
+import Login from './pages/Login';
+import SignUp from './pages/SignUp';
+import ForgotPassword from './pages/ForgotPassword';
 
-export default function Page() {
+function HomePage() {
   return (
     <>
       <Navbar />
@@ -24,5 +28,16 @@ export default function Page() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+    </Routes>
   );
 }
