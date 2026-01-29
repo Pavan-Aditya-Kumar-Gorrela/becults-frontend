@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useMotionValue, useSpring, motion } from 'framer-motion';
-
+import Man from '../assets/man_n.png';
 const springValues = {
   damping: 30,
   stiffness: 100,
@@ -278,7 +278,7 @@ export default function TiltedImage({ rotateAmplitude = 3 }) {
         >
           <div className="relative">
             <img
-              src="src/assets/man_n.png"
+              src={Man}
               className="w-full rounded-2xl will-change-transform shadow-2xl"
               alt="hero section showcase"
             />

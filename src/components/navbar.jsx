@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { MenuIcon, XIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../assets/logo.jpg'
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -57,7 +58,7 @@ export default function Navbar() {
       >
       
         <a href='#' onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className='mr-20 flex-5 cursor-pointer hover:opacity-80 transition'>
-          <img src="src/assets/logo.jpg" alt="logo" width="50%" height="10px" />
+          <img src={Logo} alt="logo" width="50%" height="10px" />
         </a>
 
         <div className="hidden lg:flex items-center gap-8 transition duration-500">

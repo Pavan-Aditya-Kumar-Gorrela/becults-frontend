@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-
+import Logo from '../assets/logo.jpg'
 export default function Footer() {
   return (
     <motion.footer
@@ -12,7 +12,7 @@ export default function Footer() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14">
         <div className="sm:col-span-2 lg:col-span-1">
           <a href='https://www.linkedin.com/in/becults/' className='mt-10'>
-          <img src="src/assets/logo.jpg" alt="logo" width="45%" />
+          <img src={Logo} alt="logo" width="45%" />
         </a>
           <p className="text-sm/7 mt-0">
             PrebuiltUI is a free and open-source UI component library with over
