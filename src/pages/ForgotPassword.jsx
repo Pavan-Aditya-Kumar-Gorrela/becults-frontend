@@ -4,6 +4,7 @@ import { Mail, Lock, ArrowRight, ArrowLeft, Check, Clock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
+import { authAPI } from '../services/api';
 
 export default function ForgotPassword() {
   const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: Reset Password
@@ -17,7 +18,7 @@ export default function ForgotPassword() {
   const [timer, setTimer] = useState(0);
   const navigate = useNavigate();
 
-  // Simulate OTP timer
+  // OTP timer
   const startTimer = () => {
     setTimer(60);
     const countdown = setInterval(() => {
@@ -44,14 +45,19 @@ export default function ForgotPassword() {
 
     setIsLoading(true);
 
-    // Simulate API call to send OTP
-    setTimeout(() => {
-      console.log('OTP sent to:', email);
-      setSuccess('Verification code sent to your email');
-      setStep(2);
-      startTimer();
+    try {
+      const response = await authAPI.forgotPassword(email);
+
+      if (response.success) {
+        setSuccess('Verification code sent to your email');
+        setStep(2);
+        startTimer();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to send reset code. Please try again.');
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   // Handle OTP input
@@ -82,13 +88,18 @@ export default function ForgotPassword() {
 
     setIsLoading(true);
 
-    // Simulate API call to verify OTP
-    setTimeout(() => {
-      console.log('OTP verified:', otpString);
-      setSuccess('Code verified successfully');
-      setStep(3);
+    try {
+      const response = await authAPI.verifyOtp(email, otpString);
+
+      if (response.success) {
+        setSuccess('Code verified successfully');
+        setStep(3);
+      }
+    } catch (err) {
+      setError(err.message || 'Invalid code. Please try again.');
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   // Handle password reset
@@ -109,17 +120,26 @@ export default function ForgotPassword() {
 
     setIsLoading(true);
 
-    // Simulate API call to reset password
-    setTimeout(() => {
-      console.log('Password reset for:', email);
-      setSuccess('Password reset successfully!');
+    try {
+      const response = await authAPI.resetPassword(
+        email,
+        newPassword,
+        confirmPassword
+      );
+
+      if (response.success) {
+        setSuccess('Password reset successfully!');
+
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      }
+    } catch (err) {
+      setError(err.message || 'Password reset failed. Please try again.');
+    } finally {
       setIsLoading(false);
-      
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    }, 1500);
+    }
   };
 
   // Handle go back

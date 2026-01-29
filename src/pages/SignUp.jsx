@@ -4,6 +4,7 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
+import { authAPI } from '../services/api';
 
 export default function SignUp() {
   const [fullName, setFullName] = useState('');
@@ -38,12 +39,27 @@ export default function SignUp() {
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Sign up:', { fullName, email, password });
+    try {
+      const response = await authAPI.signup({
+        fullName,
+        email,
+        password,
+        confirmPassword,
+      });
+
+      if (response.success) {
+        // Store token and user info
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+
+        // Redirect to home after successful signup
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.message || 'Sign up failed. Please try again.');
+    } finally {
       setIsLoading(false);
-      navigate('/'); // Redirect to home after signup
-    }, 1000);
+    }
   };
 
   const passwordStrength = password.length >= 8 ? 'strong' : password.length >= 6 ? 'medium' : 'weak';

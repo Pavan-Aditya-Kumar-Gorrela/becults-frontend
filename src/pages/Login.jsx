@@ -4,6 +4,7 @@ import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbar';
 import Footer from '../components/footer';
+import { authAPI } from '../services/api';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -18,18 +19,28 @@ export default function Login() {
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      if (email && password) {
-        console.log('Login:', { email, password });
-        // In a real app, you would make an API call here
-        setIsLoading(false);
-        navigate('/'); // Redirect to home after login
-      } else {
+    try {
+      if (!email || !password) {
         setError('Please fill in all fields');
         setIsLoading(false);
+        return;
       }
-    }, 1000);
+
+      const response = await authAPI.login({ email, password });
+
+      if (response.success) {
+        // Store token in localStorage
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+
+        // Redirect to home after successful login
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
