@@ -1,0 +1,28 @@
+import GetInTouch from './sections/get-in-touch';
+import OurTestimonials from './sections/our-testimonials';
+import SubscribeNewsletter from './sections/subscribe-newsletter';
+import TrustedCompanies from './sections/trusted-companies';
+import Footer from './components/footer';
+import Navbar from './components/navbar';
+import AboutOurApps from './sections/about-our-apps';
+import HeroSection from './sections/hero-section';
+import OurLatestCreation from './sections/our-latest-creation';
+
+export default function Page() {
+  return (
+    <>
+      <Navbar />
+      
+      <main className="px-6 md:px-16 lg:px-24 xl:px-32  text-white">
+        <HeroSection />
+        <OurLatestCreation />
+        <AboutOurApps />
+        <OurTestimonials />
+        <TrustedCompanies />
+        <GetInTouch />
+        <SubscribeNewsletter />
+      </main>
+      <Footer />
+    </>
+  );
+}
