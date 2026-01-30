@@ -42,6 +42,12 @@ export const authAPI = {
       body: JSON.stringify(credentials),
     }),
 
+  adminLogin: (credentials) =>
+    apiCall('/auth/admin/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    }),
+
   forgotPassword: (email) =>
     apiCall('/auth/forgot-password', {
       method: 'POST',
@@ -62,6 +68,40 @@ export const authAPI = {
 
   getCurrentUser: () =>
     apiCall('/auth/me', {
+      method: 'GET',
+    }),
+
+  updateProfile: (profileData) =>
+    apiCall('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    }),
+
+  logout: () =>
+    apiCall('/auth/logout', {
+      method: 'POST',
+    }),
+};
+
+// OAuth API calls
+export const oauthAPI = {
+  googleCallback: (googleData) =>
+    apiCall('/oauth/google/callback', {
+      method: 'POST',
+      body: JSON.stringify(googleData),
+    }),
+
+  githubCallback: (githubData) =>
+    apiCall('/oauth/github/callback', {
+      method: 'POST',
+      body: JSON.stringify(githubData),
+    }),
+};
+
+// Admin API calls
+export const adminAPI = {
+  getDashboard: () =>
+    apiCall('/admin/dashboard', {
       method: 'GET',
     }),
 };

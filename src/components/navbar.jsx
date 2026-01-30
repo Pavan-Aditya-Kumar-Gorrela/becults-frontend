@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { MenuIcon, XIcon } from 'lucide-react';
+import { MenuIcon, XIcon, User, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/logo.jpg'
 
-export default function Navbar() {
+export default function Navbar({ user = null, onLogout = null }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
   
   const navlinks = [
@@ -47,6 +48,21 @@ export default function Navbar() {
   const handleGetStarted = () => {
     navigate('/signup');
   };
+
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    }
+    setShowUserMenu(false);
+  };
+
+  const handleProfile = () => {
+    navigate('/profile');
+    setShowUserMenu(false);
+  };
+
+  const isLoggedIn = !!localStorage.getItem('token');
+  const loggedInUser = user || (isLoggedIn ? JSON.parse(localStorage.getItem('user') || '{}') : null);
   return (
     <>
       <motion.nav
@@ -74,18 +90,59 @@ export default function Navbar() {
         </div>
 
         <div className="hidden lg:block space-x-5 ml-8">
-          <button 
-            onClick={handleGetStarted}
-            className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md active:scale-95 font-medium"
-          >
-            Get started
-          </button>
-          <button 
-            onClick={handleLogin}
-            className="hover:bg-slate-300/20 transition px-6 py-2 border border-slate-400 rounded-md active:scale-95 font-medium"
-          >
-            Login
-          </button>
+          {isLoggedIn && loggedInUser ? (
+            <div className="relative inline-block">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition text-white rounded-md active:scale-95 font-medium flex items-center gap-2"
+              >
+                <User className="w-4 h-4" />
+                {loggedInUser.fullName?.split(' ')[0]}
+              </button>
+
+              {showUserMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50"
+                >
+                  <div className="p-4 border-b border-slate-700">
+                    <p className="text-sm text-slate-400">Signed in as</p>
+                    <p className="font-semibold text-white">{loggedInUser.email}</p>
+                  </div>
+                  <button
+                    onClick={handleProfile}
+                    className="w-full text-left px-4 py-2 hover:bg-slate-700 transition text-slate-200 font-medium flex items-center gap-2"
+                  >
+                    <User className="w-4 h-4" />
+                    Profile
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 hover:bg-slate-700 transition text-red-400 font-medium flex items-center gap-2 border-t border-slate-700"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </motion.div>
+              )}
+            </div>
+          ) : (
+            <>
+              <button 
+                onClick={handleGetStarted}
+                className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md active:scale-95 font-medium"
+              >
+                Get started
+              </button>
+              <button 
+                onClick={handleLogin}
+                className="hover:bg-slate-300/20 transition px-6 py-2 border border-slate-400 rounded-md active:scale-95 font-medium"
+              >
+                Login
+              </button>
+            </>
+          )}
         </div>
         <button
           onClick={() => setIsMenuOpen(true)}

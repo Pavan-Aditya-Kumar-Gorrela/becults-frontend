@@ -11,8 +11,14 @@ import OurLatestCreation from './sections/our-latest-creation';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
+import GitHubCallback from './pages/GitHubCallback';
+import HomePage from './pages/HomePage';
+import ProfilePage from './pages/ProfilePage';
+import AdminLoginPage from './pages/AdminLoginPage';
+import AdminDashboard from './pages/AdminDashboard';
+import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
 
-function HomePage() {
+function LandingPage() {
   return (
     <>
       <Navbar />
@@ -34,10 +40,19 @@ function HomePage() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/auth/github/callback" element={<GitHubCallback />} />
+      
+      {/* User Routes */}
+      <Route path="/home" element={<ProtectedRoute element={<HomePage />} />} />
+      <Route path="/profile" element={<ProtectedRoute element={<ProfilePage />} />} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route path="/admin/dashboard" element={<AdminRoute element={<AdminDashboard />} />} />
     </Routes>
   );
 }
