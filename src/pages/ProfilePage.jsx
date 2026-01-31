@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const loadUser = async () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -30,25 +30,53 @@ export default function ProfilePage() {
           return;
         }
 
-        const response = await authAPI.getCurrentUser();
-        if (response.success) {
-          setUser(response.user);
+        // First, try to get user from localStorage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
           setFormData({
-            fullName: response.user.fullName || '',
-            bio: response.user.bio || '',
-            phone: response.user.phone || '',
-            address: response.user.address || '',
-            email: response.user.email || '',
+            fullName: userData.fullName || '',
+            bio: userData.bio || '',
+            phone: userData.phone || '',
+            address: userData.address || '',
+            email: userData.email || '',
           });
         }
+
+        // Then, try to fetch fresh data from backend
+        try {
+          const response = await authAPI.getCurrentUser();
+          if (response.success) {
+            setUser(response.user);
+            setFormData({
+              fullName: response.user.fullName || '',
+              bio: response.user.bio || '',
+              phone: response.user.phone || '',
+              address: response.user.address || '',
+              email: response.user.email || '',
+            });
+            localStorage.setItem('user', JSON.stringify(response.user));
+          }
+        } catch (err) {
+          // If backend call fails, just use localStorage data
+          console.warn('Could not fetch updated user data:', err.message);
+          if (!storedUser) {
+            throw err;
+          }
+        }
       } catch (err) {
+        console.error('Error loading user:', err);
         setError('Failed to load profile');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchUser();
+    loadUser();
   }, [navigate]);
 
   const handleChange = (e) => {

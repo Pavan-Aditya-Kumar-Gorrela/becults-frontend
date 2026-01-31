@@ -12,7 +12,6 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
 import GitHubCallback from './pages/GitHubCallback';
-import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboard from './pages/AdminDashboard';
@@ -47,7 +46,7 @@ export default function App() {
       <Route path="/auth/github/callback" element={<GitHubCallback />} />
       
       {/* User Routes */}
-      <Route path="/home" element={<ProtectedRoute element={<HomePage />} />} />
+      
       <Route path="/profile" element={<ProtectedRoute element={<ProfilePage />} />} />
       
       {/* Admin Routes */}
