@@ -106,4 +106,93 @@ export const adminAPI = {
     }),
 };
 
+// Cohort API calls
+export const cohortAPI = {
+  getAllCohorts: (category = 'All') =>
+    apiCall(`/cohorts${category !== 'All' ? `?category=${category}` : ''}`, {
+      method: 'GET',
+    }),
+
+  getCohortById: (cohortId) =>
+    apiCall(`/cohorts/${cohortId}`, {
+      method: 'GET',
+    }),
+
+  getCohortDetails: (cohortId) =>
+    apiCall(`/cohorts/${cohortId}/details`, {
+      method: 'GET',
+    }),
+
+  enrollInCohort: (cohortId) =>
+    apiCall(`/cohorts/${cohortId}/enroll`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
+
+  unenrollFromCohort: (cohortId) =>
+    apiCall(`/cohorts/${cohortId}/unenroll`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
+
+  getUserEnrolledCohorts: () =>
+    apiCall('/cohorts/user/enrolled', {
+      method: 'GET',
+    }),
+};
+
+// Channel API calls
+export const channelAPI = {
+  getChannelInfo: (channelKey) =>
+    apiCall(`/channels/${channelKey}`, {
+      method: 'GET',
+    }),
+
+  getChannelMessages: (channelKey, limit = 50, skip = 0) =>
+    apiCall(`/channels/${channelKey}/messages?limit=${limit}&skip=${skip}`, {
+      method: 'GET',
+    }),
+
+  sendMessage: (channelKey, text) =>
+    apiCall(`/channels/${channelKey}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    }),
+
+  muteUser: (channelKey, userId) =>
+    apiCall(`/channels/${channelKey}/mute`, {
+      method: 'PATCH',
+      body: JSON.stringify({ userId }),
+    }),
+
+  unmuteUser: (channelKey, userId) =>
+    apiCall(`/channels/${channelKey}/unmute`, {
+      method: 'PATCH',
+      body: JSON.stringify({ userId }),
+    }),
+
+  removeUserFromChannel: (channelKey, userId) =>
+    apiCall(`/channels/${channelKey}/members/${userId}`, {
+      method: 'DELETE',
+    }),
+
+  addUserToChannel: (channelKey, userId) =>
+    apiCall(`/channels/${channelKey}/members`, {
+      method: 'POST',
+      body: JSON.stringify({ userId }),
+    }),
+
+  // Admin channel management
+  createChannel: (cohortId, description) =>
+    apiCall(`/channels/admin/create`, {
+      method: 'POST',
+      body: JSON.stringify({ cohortId, description }),
+    }),
+
+  getAllCohortsForChannels: () =>
+    apiCall(`/channels/admin/cohorts`, {
+      method: 'GET',
+    }),
+};
+
 export default authAPI;

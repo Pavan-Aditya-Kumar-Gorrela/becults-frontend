@@ -1,31 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LogOut, Users, Activity, Clock, AlertCircle } from 'lucide-react';
-import Navbar from '../components/navbar';
-import Footer from '../components/footer';
-import { authAPI, adminAPI } from '../services/api';
+import { Users, Activity, Clock, AlertCircle, BookOpen } from 'lucide-react';
+import AdminLayout from '../components/AdminLayout';
+import { adminAPI } from '../services/api';
 
 export default function AdminDashboard() {
-  const [user, setUser] = useState(null);
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-
-        if (!token || !storedUser.isAdmin) {
-          navigate('/admin/login');
-          return;
-        }
-
-        setUser(storedUser);
-
         // Fetch dashboard stats
         const response = await adminAPI.getDashboard();
         if (response.success) {
@@ -40,53 +26,34 @@ export default function AdminDashboard() {
     };
 
     fetchDashboard();
-  }, [navigate]);
-
-  const handleLogout = async () => {
-    try {
-      await authAPI.logout();
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      navigate('/admin/login');
-    } catch (err) {
-      setError('Logout failed');
-    }
-  };
+  }, []);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-black flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-yellow-600 border-t-orange-600 rounded-full animate-spin"></div>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-purple-600 rounded-full animate-spin"></div>
+        </div>
+      </AdminLayout>
     );
   }
 
   return (
-    <>
-      <Navbar user={user} onLogout={handleLogout} />
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-black text-white pt-20 pb-20">
-        <div className="max-w-7xl mx-auto px-6 md:px-16">
+    <AdminLayout>
+      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-black text-white p-6 md:p-12">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
             {/* Header */}
-            <div className="flex justify-between items-start mb-12">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-yellow-600 to-orange-600 rounded-full"></div>
-                  <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-                </div>
-                <p className="text-slate-400">Welcome back, {user?.fullName}!</p>
+            <div className="mb-12">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full"></div>
+                <h1 className="text-4xl font-bold">Admin Dashboard</h1>
               </div>
-              <button
-                onClick={handleLogout}
-                className="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-colors flex items-center gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
+              <p className="text-slate-400">Manage your platform and monitor statistics</p>
             </div>
 
             {/* Error Message */}
@@ -94,7 +61,7 @@ export default function AdminDashboard() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-400 mb-8 flex items-center gap-2"
+                className="bg-red-900/20 border border-red-800 rounded-lg p-4 text-red-400 mb-8 flex items-center gap-2"
               >
                 <AlertCircle className="w-5 h-5" />
                 {error}
@@ -190,8 +157,12 @@ export default function AdminDashboard() {
               >
                 <h2 className="text-xl font-bold mb-6">Quick Actions</h2>
                 <div className="space-y-3">
-                  <button className="w-full px-4 py-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg font-semibold transition-colors text-left">
-                    Manage Users
+                  <button
+                    onClick={() => navigate('/admin/cohorts')}
+                    className="w-full px-4 py-3 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg font-semibold transition-colors text-left flex items-center gap-2"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    Manage Cohorts
                   </button>
                   <button className="w-full px-4 py-3 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg font-semibold transition-colors text-left">
                     View Reports
@@ -213,18 +184,18 @@ export default function AdminDashboard() {
               transition={{ delay: 0.6 }}
               className="mt-8 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6"
             >
-              <h2 className="text-xl font-bold mb-4">Admin Information</h2>
+              <h2 className="text-xl font-bold mb-4">System Status</h2>
               <div className="grid md:grid-cols-3 gap-6">
                 <div>
-                  <p className="text-slate-400 text-sm mb-2">Admin Name</p>
-                  <p className="text-lg font-semibold">{user?.fullName}</p>
+                  <p className="text-slate-400 text-sm mb-2">Platform Status</p>
+                  <p className="text-lg font-semibold text-green-400">Online</p>
                 </div>
                 <div>
-                  <p className="text-slate-400 text-sm mb-2">Email</p>
-                  <p className="text-lg font-semibold">{user?.email}</p>
+                  <p className="text-slate-400 text-sm mb-2">Database</p>
+                  <p className="text-lg font-semibold text-green-400">Connected</p>
                 </div>
                 <div>
-                  <p className="text-slate-400 text-sm mb-2">Status</p>
+                  <p className="text-slate-400 text-sm mb-2">API Status</p>
                   <p className="text-lg font-semibold text-green-400">Active</p>
                 </div>
               </div>
@@ -232,7 +203,6 @@ export default function AdminDashboard() {
           </motion.div>
         </div>
       </div>
-      <Footer />
-    </>
-  );
+      </AdminLayout>
+    );
 }

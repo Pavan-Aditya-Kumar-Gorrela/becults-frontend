@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Save, Mail, Phone, MapPin, User } from 'lucide-react';
-import Navbar from '../components/navbar';
+import LoggedInNavbar from '../components/LoggedInNavbar';
 import Footer from '../components/footer';
 import { authAPI } from '../services/api';
 
@@ -124,7 +124,7 @@ export default function ProfilePage() {
 
   return (
     <>
-      <Navbar />
+      <LoggedInNavbar />
       <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-black text-white pt-20 pb-20">
         <div className="max-w-2xl mx-auto px-6">
           <motion.div
@@ -135,7 +135,7 @@ export default function ProfilePage() {
             {/* Header */}
             <div className="flex items-center gap-4 mb-8">
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/home')}
                 className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
               >
                 <ArrowLeft className="w-6 h-6" />

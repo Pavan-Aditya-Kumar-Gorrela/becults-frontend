@@ -19,7 +19,7 @@ export const AdminRoute = ({ element }) => {
   }
 
   if (!user.isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return element;

@@ -15,6 +15,13 @@ import GitHubCallback from './pages/GitHubCallback';
 import ProfilePage from './pages/ProfilePage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminCohortPanel from './pages/AdminCohortPanel';
+import AdminCommunityChannels from './pages/AdminCommunityChannels';
+import UpcomingCohortsPanel from './pages/UpcomingCohortsPanel';
+import AdminSettings from './pages/AdminSettings';
+import Home from './pages/Home';
+import Explore from './pages/Explore';
+import CohortDetail from './pages/CohortDetail';
 import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
 
 function LandingPage() {
@@ -46,12 +53,18 @@ export default function App() {
       <Route path="/auth/github/callback" element={<GitHubCallback />} />
       
       {/* User Routes */}
-      
+      <Route path="/home" element={<ProtectedRoute element={<Home />} />} />
+      <Route path="/explore" element={<ProtectedRoute element={<Explore />} />} />
+      <Route path="/cohort/:cohortId" element={<ProtectedRoute element={<CohortDetail />} />} />
       <Route path="/profile" element={<ProtectedRoute element={<ProfilePage />} />} />
       
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route path="/admin/dashboard" element={<AdminRoute element={<AdminDashboard />} />} />
+      <Route path="/admin/cohorts" element={<AdminRoute element={<AdminCohortPanel />} />} />
+      <Route path="/admin/channels" element={<AdminRoute element={<AdminCommunityChannels />} />} />
+      <Route path="/admin/upcoming-cohorts" element={<AdminRoute element={<UpcomingCohortsPanel />} />} />
+      <Route path="/admin/settings" element={<AdminRoute element={<AdminSettings />} />} />
     </Routes>
   );
 }
