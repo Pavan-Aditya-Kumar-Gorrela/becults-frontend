@@ -22,7 +22,12 @@ const apiCall = async (endpoint, options = {}) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || 'An error occurred');
+    const error = new Error(data.message || 'An error occurred');
+    error.response = {
+      status: response.status,
+      data: data,
+    };
+    throw error;
   }
 
   return data;

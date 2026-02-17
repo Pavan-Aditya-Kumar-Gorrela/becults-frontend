@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from './AdminSidebar';
-import AdminNavbar from './AdminNavbar';
 import { authAPI } from '../services/api';
 
 export default function AdminLayout({ children }) {
@@ -41,17 +40,18 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div className="flex h-screen bg-slate-950">
       {/* Sidebar */}
-      <AdminSidebar user={user} onLogout={handleLogout} />
-      
+      <aside className="w-64 min-h-screen bg-slate-900 border-r border-slate-800 flex flex-col">
+        <AdminSidebar user={user} onLogout={handleLogout} />
+      </aside>
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-0 overflow-y-auto flex flex-col">
-        <AdminNavbar />
-        <div className="flex-1 min-h-screen">
+      <main className="flex-1 flex flex-col min-h-screen">
+       
+        <section className="flex-1 p-8 bg-slate-950 overflow-y-auto">
           {children}
-        </div>
+        </section>
       </main>
     </div>
   );

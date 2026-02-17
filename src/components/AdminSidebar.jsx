@@ -1,59 +1,56 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Menu, X, LogOut, BookOpen, BarChart3, Settings, MessageSquare } from 'lucide-react';
+import { Menu, X,Clock, LogOut, BookOpen, BarChart3, Settings, MessageSquare } from 'lucide-react';
 
 export default function AdminSidebar({ user, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+  // Sidebar is always open; remove mobile toggle
 
   const menuItems = [
     {
       icon: BarChart3,
       label: 'Dashboard',
       path: '/admin/dashboard',
-      description: 'Overview & stats',
     },
     {
       icon: BookOpen,
-      label: 'Cohort Management',
+      label: 'Cohorts',
       path: '/admin/cohorts',
-      description: 'Create & manage cohorts',
     },
     {
       icon: MessageSquare,
       label: 'Community Channels',
       path: '/admin/channels',
-      description: 'Manage channel creation',
+    },
+    {
+      icon: Clock,
+      label: 'Upcoming Cohorts',
+      path: '/admin/upcoming-cohorts',
     },
     {
       icon: Settings,
       label: 'Settings',
       path: '/admin/settings',
-      description: 'System settings',
     },
   ];
 
-  const handleLogout = async () => {
-    onLogout();
-    navigate('/admin/login');
-  };
+  // Helper to check if a menu item is active
+  function isActive(path) {
+    return location.pathname === path;
+  }
 
-  const isActive = (path) => location.pathname === path;
+  function handleLogout() {
+    if (onLogout) onLogout();
+    navigate('/login');
+  }
+
+  // Sidebar is always open on desktop, so set isOpen to true
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <>
-      {/* Mobile Toggle Button */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg"
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </motion.button>
-
       {/* Overlay for mobile */}
       {isOpen && (
         <motion.div
@@ -70,12 +67,12 @@ export default function AdminSidebar({ user, onLogout }) {
         initial={{ x: -280 }}
         animate={{ x: isOpen ? 0 : -280 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="md:sticky md:animate-none fixed top-0 left-0 md:translate-x-0 w-64 h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border-r border-slate-800 z-40 flex flex-col"
+        className="sticky top-0 left-0 w-64 min-h-screen bg-slate-900 border-r border-slate-800 z-40 flex flex-col shadow-lg"
       >
         {/* Logo Section */}
         <div className="p-6 border-b border-slate-800">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow">
               <span className="text-white font-bold text-lg">A</span>
             </div>
             <div>
@@ -92,36 +89,30 @@ export default function AdminSidebar({ user, onLogout }) {
           <p className="text-xs text-slate-500">{user?.email}</p>
         </div>
 
-        {/* Navigation Menu */}
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            return (
-              <motion.button
-                key={item.path}
-                whileHover={{ x: 4 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                  navigate(item.path);
-                  setIsOpen(false);
-                }}
-                className={`w-full px-4 py-3 rounded-lg font-semibold transition flex items-center gap-3 ${
-                  active
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-800/50'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <div className="text-left flex-1">
-                  <p className="text-sm">{item.label}</p>
-                  <p className={`text-xs ${active ? 'text-blue-100' : 'text-slate-500'}`}>
-                    {item.description}
-                  </p>
-                </div>
-              </motion.button>
-            );
-          })}
+        {/* Navigation Tabs */}
+        <nav className="flex-1 px-4 py-6">
+          <ul className="flex flex-col gap-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+              return (
+                <li key={item.path}>
+                  <button
+                    onClick={() => {
+                      navigate(item.path);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition text-left
+                      ${active ? 'bg-blue-600 text-white shadow' : 'text-slate-300 hover:bg-slate-800/70'}
+                    `}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="text-base">{item.label}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </nav>
 
         {/* Logout Button */}

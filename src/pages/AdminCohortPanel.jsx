@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit2, CheckCircle, Circle, AlertCircle, Loader } from 'lucide-react';
+import { Plus, Trash2, Edit2, CheckCircle, Circle, AlertCircle, Loader, X, Link as LinkIcon } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
 export default function AdminCohortPanel() {
@@ -22,7 +22,9 @@ export default function AdminCohortPanel() {
     cohortId: null,
     title: '',
     description: '',
+    references: [],
   });
+  const [newReference, setNewReference] = useState('');
 
   const [videoForm, setVideoForm] = useState({
     cohortId: null,
@@ -171,12 +173,31 @@ export default function AdminCohortPanel() {
     }
   };
 
+  // Add reference to roadmap form
+  const handleAddReference = () => {
+    if (newReference.trim()) {
+      setRoadmapForm({
+        ...roadmapForm,
+        references: [...roadmapForm.references, newReference.trim()],
+      });
+      setNewReference('');
+    }
+  };
+
+  // Remove reference from roadmap form
+  const handleRemoveReference = (index) => {
+    setRoadmapForm({
+      ...roadmapForm,
+      references: roadmapForm.references.filter((_, i) => i !== index),
+    });
+  };
+
   // Add roadmap item
   const handleAddRoadmapItem = async (e) => {
     e.preventDefault();
 
     if (!roadmapForm.title || !roadmapForm.description) {
-      alert('Please fill in all fields');
+      alert('Please fill in all required fields');
       return;
     }
 
@@ -191,6 +212,7 @@ export default function AdminCohortPanel() {
         body: JSON.stringify({
           title: roadmapForm.title,
           description: roadmapForm.description,
+          references: roadmapForm.references,
         }),
       });
 
@@ -200,7 +222,8 @@ export default function AdminCohortPanel() {
 
       const data = await response.json();
       setCohorts(cohorts.map(c => c._id === roadmapForm.cohortId ? data.data : c));
-      setRoadmapForm({ cohortId: null, title: '', description: '' });
+      setRoadmapForm({ cohortId: null, title: '', description: '', references: [] });
+      setNewReference('');
       alert('Roadmap item added!');
     } catch (err) {
       alert(`Error: ${err.message}`);
@@ -506,6 +529,54 @@ export default function AdminCohortPanel() {
                                 rows="2"
                                 className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 text-sm"
                               />
+                              
+                              {/* References Section */}
+                              <div className="space-y-2">
+                                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1">
+                                  <LinkIcon className="w-3 h-3" />
+                                  References (Optional)
+                                </label>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={newReference}
+                                    onChange={(e) => setNewReference(e.target.value)}
+                                    onKeyPress={(e) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleAddReference();
+                                      }
+                                    }}
+                                    placeholder="Add reference URL or text"
+                                    className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 text-sm"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={handleAddReference}
+                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-semibold transition"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </button>
+                                </div>
+                                {roadmapForm.references.length > 0 && (
+                                  <div className="space-y-1">
+                                    {roadmapForm.references.map((ref, idx) => (
+                                      <div key={idx} className="flex items-center gap-2 px-2 py-1 bg-slate-800 rounded text-sm">
+                                        <LinkIcon className="w-3 h-3 text-blue-400 flex-shrink-0" />
+                                        <span className="flex-1 text-slate-300 truncate">{ref}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveReference(idx)}
+                                          className="text-red-400 hover:text-red-300 transition"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
                               <div className="flex gap-2">
                                 <button
                                   type="submit"
@@ -515,7 +586,10 @@ export default function AdminCohortPanel() {
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => setRoadmapForm({ cohortId: null, title: '', description: '' })}
+                                  onClick={() => {
+                                    setRoadmapForm({ cohortId: null, title: '', description: '', references: [] });
+                                    setNewReference('');
+                                  }}
                                   className="px-4 py-1 bg-slate-600 hover:bg-slate-500 text-white rounded text-sm transition"
                                 >
                                   Cancel
@@ -526,7 +600,7 @@ export default function AdminCohortPanel() {
                             <motion.button
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
-                              onClick={() => setRoadmapForm({ cohortId: cohort._id, title: '', description: '' })}
+                              onClick={() => setRoadmapForm({ cohortId: cohort._id, title: '', description: '', references: [] })}
                               className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded font-semibold transition flex items-center justify-center gap-2"
                             >
                               <Plus className="w-4 h-4" />
