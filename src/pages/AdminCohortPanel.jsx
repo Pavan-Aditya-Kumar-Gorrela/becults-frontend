@@ -108,7 +108,7 @@ export default function AdminCohortPanel() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:/api/admin/cohorts', {
+      const response = await fetch(`${API_BASE_URL}/admin/cohorts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
