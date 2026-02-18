@@ -6,6 +6,7 @@ import LoggedInNavbar from '../components/LoggedInNavbar';
 import Footer from '../components/footer';
 import { authAPI } from '../services/api';
 
+
 const inputClass =
   'w-full px-4 py-3 bg-[#0d1117] border border-[#21262d] rounded-xl text-[#e6edf3] placeholder-[#484f58] focus:outline-none focus:border-[#58a6ff] focus:ring-1 focus:ring-[#58a6ff]/30 transition-all duration-200 font-mono text-sm';
 

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AlertCircle, CheckCircle } from 'lucide-react';
-
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 export default function GitHubCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ export default function GitHubCallback() {
 
         // Exchange code for access token via backend
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/oauth/github/callback`,
+          `${API_BASE_URL}/oauth/github/callback`,
           {
             method: 'POST',
             headers: {

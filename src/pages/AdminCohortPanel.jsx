@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Plus, Trash2, Edit2, CheckCircle, Circle, AlertCircle, Loader, X, Link as LinkIcon, Image as ImageIcon, FileText } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 export default function AdminCohortPanel() {
   const [cohorts, setCohorts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +72,7 @@ export default function AdminCohortPanel() {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/admin/cohorts', {
+      const response = await fetch(`${API_BASE_URL}/admin/cohorts`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -107,7 +108,7 @@ export default function AdminCohortPanel() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/admin/cohorts', {
+      const response = await fetch('http://localhost:/api/admin/cohorts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +143,7 @@ export default function AdminCohortPanel() {
   const handleToggleStatus = async (cohortId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/cohorts/${cohortId}/toggle`, {
+      const response = await fetch(`${API_BASE_URL}/admin/cohorts/${cohortId}/toggle`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -169,7 +170,7 @@ export default function AdminCohortPanel() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/cohorts/${cohortId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/cohorts/${cohortId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -218,7 +219,7 @@ export default function AdminCohortPanel() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/cohorts/${roadmapForm.cohortId}/roadmap`, {
+      const response = await fetch(`${API_BASE_URL}/admin/cohorts/${roadmapForm.cohortId}/roadmap`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +250,7 @@ export default function AdminCohortPanel() {
   const handleDeleteRoadmapItem = async (cohortId, itemId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/cohorts/${cohortId}/roadmap/${itemId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/cohorts/${cohortId}/roadmap/${itemId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -279,7 +280,7 @@ export default function AdminCohortPanel() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/cohorts/${videoForm.cohortId}/videos`, {
+      const response = await fetch(`${API_BASE_URL}/admin/cohorts/${videoForm.cohortId}/videos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -309,7 +310,7 @@ export default function AdminCohortPanel() {
   const handleDeleteVideo = async (cohortId, videoId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/cohorts/${cohortId}/videos/${videoId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/cohorts/${cohortId}/videos/${videoId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

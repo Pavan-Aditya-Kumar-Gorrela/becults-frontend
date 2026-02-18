@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { oauthAPI } from '../services/api';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 export const useGitHubSignIn = () => {
   const navigate = useNavigate();
 
@@ -20,7 +21,7 @@ export const useGitHubSignIn = () => {
     try {
       // Get user info from GitHub (requires backend to exchange code for token)
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/oauth/github/callback`,
+        `${API_BASE_URL}/oauth/github/callback`,
         {
           method: 'POST',
           headers: {
