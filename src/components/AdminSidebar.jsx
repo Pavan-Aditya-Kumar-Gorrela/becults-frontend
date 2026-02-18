@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Menu, X,Clock, LogOut, BookOpen, BarChart3, Settings, MessageSquare } from 'lucide-react';
+import { Menu, UserCheck,X,Clock, LogOut, BookOpen, BarChart3, Settings, MessageSquare } from 'lucide-react';
 
 export default function AdminSidebar({ user, onLogout }) {
   const navigate = useNavigate();
@@ -24,11 +24,7 @@ export default function AdminSidebar({ user, onLogout }) {
       label: 'Community Channels',
       path: '/admin/channels',
     },
-    {
-      icon: Clock,
-      label: 'Upcoming Cohorts',
-      path: '/admin/upcoming-cohorts',
-    },
+    
     {
       icon: Settings,
       label: 'Settings',
@@ -73,7 +69,7 @@ export default function AdminSidebar({ user, onLogout }) {
         <div className="p-6 border-b border-slate-800">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow">
-              <span className="text-white font-bold text-lg">A</span>
+              <UserCheck/>
             </div>
             <div>
               <h1 className="text-xl font-bold text-white">Admin</h1>

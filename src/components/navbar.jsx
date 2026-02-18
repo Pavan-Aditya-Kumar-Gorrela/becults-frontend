@@ -1,144 +1,155 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MenuIcon, XIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import Logo from '../assets/logo.jpg'
+import Logo from '../assets/logo.jpg';
+
+const navlinks = [
+  { href: '#cohorts',      text: 'Cohorts',      id: 'cohorts'      },
+  { href: '#about',        text: 'About',        id: 'about'        },
+  { href: '#testimonials', text: 'Testimonials', id: 'testimonials' },
+  { href: '#contact',      text: 'Contact',      id: 'contact'      },
+];
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
-  
-  const navlinks = [
-    {
-      href: '#cohorts',
-      text: 'Cohorts',
-      id: 'cohorts',
-    },
-    {
-      href: '#about',
-      text: 'About',
-      id: 'about',
-    },
-    {
-      href: '#testimonials',
-      text: 'Testimonials',
-      id: 'testimonials',
-    },
-    {
-      href: '#contact',
-      text: 'Contact',
-      id: 'contact',
-    },
-  ];
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleNavClick = (href) => {
-    const id = href.replace('#', '');
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    const el = document.getElementById(href.replace('#', ''));
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
     setIsMenuOpen(false);
-  };
-
-  const handleLogin = () => {
-    navigate('/login');
-  };
-
-  const handleGetStarted = () => {
-    navigate('/signup');
   };
 
   return (
     <>
       <motion.nav
-        className="sticky top-0 z-50 flex items-center justify-between w-full h-18 px-6 md:px-16 lg:px-24 xl:px-32 backdrop-blur bg-black/30 border-b border-slate-700/50"
-        initial={{ y: -100, opacity: 0 }}
+        initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ type: 'spring', stiffness: 250, damping: 70, mass: 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 60 }}
+        className={`fixed top-0 left-0 right-0 z-50 h-16 px-6 md:px-10 flex items-center justify-between
+          bg-[#010409]/90 backdrop-blur-md border-b border-[#21262d] transition-shadow duration-300
+          ${scrolled ? 'shadow-xl shadow-black/40' : ''}`}
       >
-      
-        <a href='#' onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className='mr-20 flex-5 cursor-pointer hover:opacity-80 transition'>
-          <img src={Logo} alt="logo" width="50%" height="10px" />
+        {/* Logo */}
+        <a
+          href="#"
+          onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+          className="shrink-0 mr-10 opacity-80 hover:opacity-100 transition-opacity"
+        >
+          <img src={Logo} alt="logo" className="h-30   w-auto" />
         </a>
 
-        <div className="hidden lg:flex items-center gap-8 transition duration-500">
-          {navlinks.map((link) => (
+        {/* Desktop nav links */}
+        <div className="hidden lg:flex items-center gap-1 flex-1">
+          {navlinks.map(({ id, text, href }) => (
             <button
-              key={link.id}
-              onClick={() => handleNavClick(link.href)}
-              className="text-slate-200 hover:text-white transition duration-300 font-medium"
+              key={id}
+              onClick={() => handleNavClick(href)}
+              className="flex items-center px-3.5 py-2 rounded-lg text-xs font-mono uppercase tracking-wider text-[#7d8590] hover:text-[#c9d1d9] hover:bg-[#161b22] transition-all duration-200"
             >
-              {link.text}
+              {text}
             </button>
           ))}
         </div>
 
-        <div className="hidden lg:block space-x-5 ml-8">
-          <button 
-            onClick={handleGetStarted}
-            className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md active:scale-95 font-medium"
+        {/* Desktop CTAs */}
+        <div className="hidden lg:flex items-center gap-2">
+          <button
+            onClick={() => navigate('/login')}
+            className="px-4 py-2 text-xs font-mono uppercase tracking-wider text-[#7d8590] hover:text-[#e6edf3] bg-[#0d1117] hover:bg-[#161b22] border border-[#21262d] hover:border-[#30363d] rounded-xl transition-all duration-200 active:scale-[0.97]"
+          >
+            Log in
+          </button>
+          <button
+            onClick={() => navigate('/signup')}
+            className="px-4 py-2 text-xs font-mono uppercase tracking-wider text-white bg-[#1f6feb] hover:bg-[#388bfd] rounded-xl transition-all duration-200 shadow-lg shadow-[#1f6feb]/20 hover:shadow-[#1f6feb]/30 active:scale-[0.97]"
           >
             Get started
           </button>
-          <button 
-            onClick={handleLogin}
-            className="hover:bg-slate-300/20 transition px-6 py-2 border border-slate-400 rounded-md active:scale-95 font-medium"
-          >
-            Login
-          </button>
         </div>
+
+        {/* Mobile hamburger */}
         <button
           onClick={() => setIsMenuOpen(true)}
-          className="lg:hidden active:scale-90 transition"
+          className="lg:hidden p-2 rounded-lg hover:bg-[#161b22] border border-transparent hover:border-[#21262d] transition-all active:scale-90"
         >
-          <MenuIcon className="size-6" />
+          <MenuIcon className="w-5 h-5 text-[#7d8590]" />
         </button>
       </motion.nav>
-      <motion.div
-        className={`fixed inset-0 z-100 bg-black/80 backdrop-blur flex flex-col items-center justify-center text-lg gap-8 lg:hidden transition-all duration-400 ${
-          isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'
-        }`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isMenuOpen ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        {navlinks.map((link) => (
-          <button
-            key={link.id}
-            onClick={() => handleNavClick(link.href)}
-            className="text-white hover:text-slate-300 transition duration-300 font-medium text-xl"
-          >
-            {link.text}
-          </button>
-        ))}
-        <div className="flex gap-4 mt-8">
-          <button
-            onClick={() => {
-              handleGetStarted();
-              setIsMenuOpen(false);
-            }}
-            className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 transition text-white rounded-md active:scale-95 font-medium"
-          >
-            Get started
-          </button>
-          <button
-            onClick={() => {
-              handleLogin();
-              setIsMenuOpen(false);
-            }}
-            className="px-6 py-2 border border-slate-400 hover:bg-slate-300/20 transition rounded-md active:scale-95 font-medium"
-          >
-            Login
-          </button>
-        </div>
-        <button
-          onClick={() => setIsMenuOpen(false)}
-          className="active:ring-3 active:ring-white absolute top-6 right-6 aspect-square size-10 p-1 items-center justify-center bg-slate-100 hover:bg-slate-200 transition text-black rounded-md flex"
-        >
-          <XIcon />
-        </button>
-      </motion.div>
+
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMenuOpen(false)}
+              className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm lg:hidden"
+            />
+
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 35 }}
+              className="fixed top-0 right-0 bottom-0 z-[100] w-72 bg-[#0d1117] border-l border-[#21262d] flex flex-col lg:hidden"
+            >
+              {/* Drawer header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[#21262d]">
+                <img src={Logo} alt="logo" className="h-6 w-auto opacity-80" />
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-[#161b22] border border-transparent hover:border-[#21262d] transition-all"
+                >
+                  <XIcon className="w-4 h-4 text-[#7d8590]" />
+                </button>
+              </div>
+
+              {/* Nav links */}
+              <div className="flex-1 p-3 space-y-1">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-[#484f58] px-3 py-2">Navigation</p>
+                {navlinks.map(({ id, text, href }) => (
+                  <button
+                    key={id}
+                    onClick={() => handleNavClick(href)}
+                    className="w-full flex items-center px-3 py-3 rounded-xl text-xs font-mono uppercase tracking-wider text-[#7d8590] hover:text-[#e6edf3] hover:bg-[#161b22] border border-transparent transition-all"
+                  >
+                    {text}
+                  </button>
+                ))}
+              </div>
+
+              {/* CTA buttons */}
+              <div className="p-4 border-t border-[#21262d] space-y-2">
+                <button
+                  onClick={() => { navigate('/signup'); setIsMenuOpen(false); }}
+                  className="w-full py-2.5 bg-[#1f6feb] hover:bg-[#388bfd] rounded-xl text-xs font-mono uppercase tracking-wider text-white font-semibold transition-all active:scale-[0.97] shadow-lg shadow-[#1f6feb]/15"
+                >
+                  Get started
+                </button>
+                <button
+                  onClick={() => { navigate('/login'); setIsMenuOpen(false); }}
+                  className="w-full py-2.5 bg-[#0d1117] hover:bg-[#161b22] border border-[#21262d] hover:border-[#30363d] rounded-xl text-xs font-mono uppercase tracking-wider text-[#7d8590] hover:text-[#e6edf3] transition-all active:scale-[0.97]"
+                >
+                  Log in
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

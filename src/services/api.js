@@ -109,12 +109,23 @@ export const adminAPI = {
     apiCall('/admin/dashboard', {
       method: 'GET',
     }),
+
+  inviteAdmin: (email, password, fullName) =>
+    apiCall('/admin/invite', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, fullName }),
+    }),
 };
 
 // Cohort API calls
 export const cohortAPI = {
   getAllCohorts: (category = 'All') =>
     apiCall(`/cohorts${category !== 'All' ? `?category=${category}` : ''}`, {
+      method: 'GET',
+    }),
+
+  getUpcomingCohorts: () =>
+    apiCall('/cohorts/upcoming', {
       method: 'GET',
     }),
 

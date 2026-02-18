@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit2, CheckCircle, Circle, AlertCircle, Loader, X, Link as LinkIcon } from 'lucide-react';
+import { Plus, Trash2, Edit2, CheckCircle, Circle, AlertCircle, Loader, X, Link as LinkIcon, Image as ImageIcon, FileText } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
 export default function AdminCohortPanel() {
@@ -16,6 +16,7 @@ export default function AdminCohortPanel() {
     title: '',
     description: '',
     category: 'Web Development',
+    status: 'present', // 'present' or 'upcoming'
   });
 
   const [roadmapForm, setRoadmapForm] = useState({
@@ -31,6 +32,14 @@ export default function AdminCohortPanel() {
     title: '',
     videoUrl: '',
     duration: '',
+  });
+
+  const [resourceForm, setResourceForm] = useState({
+    cohortId: null,
+    title: '',
+    type: 'link',
+    url: '',
+    description: '',
   });
 
   const categories = [
@@ -104,7 +113,13 @@ export default function AdminCohortPanel() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          // present => active, upcoming => inactive
+          isActive: formData.status === 'present',
+        }),
       });
 
       if (!response.ok) {
@@ -115,7 +130,7 @@ export default function AdminCohortPanel() {
 
       const data = await response.json();
       setCohorts([data.data, ...cohorts]);
-      setFormData({ title: '', description: '', category: 'Web Development' });
+      setFormData({ title: '', description: '', category: 'Web Development', status: 'present' });
       setShowCreateForm(false);
       alert('Cohort created successfully!');
     } catch (err) {
@@ -313,6 +328,12 @@ export default function AdminCohortPanel() {
     }
   };
 
+  // Add resource (image, pdf, link, etc.)
+ 
+
+  // Delete resource
+  
+
   if (loading) {
     return (
       <AdminLayout>
@@ -404,7 +425,24 @@ export default function AdminCohortPanel() {
                     className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
                   />
                 </div>
-                <div className="flex gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                  <div>
+                    <label className="block text-sm font-semibold text-white mb-2">
+                      Cohort Status
+                    </label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 text-sm"
+                    >
+                      <option value="present">Present (Active)</option>
+                      <option value="upcoming">Upcoming (Inactive)</option>
+                    </select>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Upcoming cohorts will appear in the upcoming cohorts pages.
+                    </p>
+                  </div>
+                  <div className="flex gap-3 md:justify-end">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -420,6 +458,7 @@ export default function AdminCohortPanel() {
                   >
                     Cancel
                   </button>
+                </div>
                 </div>
               </form>
             </motion.div>
@@ -683,6 +722,8 @@ export default function AdminCohortPanel() {
                             </motion.button>
                           )}
                         </div>
+
+                        
                       </motion.div>
                     )}
                   </div>
@@ -691,7 +732,7 @@ export default function AdminCohortPanel() {
             )}
           </div>
         </motion.section>
-        </div>
+      </div>
       </AdminLayout>
     );
   }

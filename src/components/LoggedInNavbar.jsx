@@ -1,207 +1,276 @@
-import { useState } from 'react';
-import { MenuIcon, XIcon, User, LogOut, Home, Settings, BookOpen } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { MenuIcon, XIcon, User, LogOut, Home, BookOpen, Calendar, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Logo from '../assets/logo.jpg';
+
+const navlinks = [
+  { text: 'Home',     id: 'home',             icon: Home,     path: '/home' },
+  { text: 'Explore',  id: 'explore',          icon: BookOpen, path: '/explore' },
+  { text: 'Upcoming', id: 'upcoming-cohorts', icon: Calendar, path: '/upcoming-cohorts' },
+];
 
 export default function LoggedInNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [user] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
   const navigate = useNavigate();
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
+  const location = useLocation();
+  const dropdownRef = useRef(null);
 
-  const navlinks = [
-    {
-      href: '#',
-      text: 'Home',
-      id: 'home',
-      icon: Home,
-      onClick: () => navigate('/home'),
-    },
-    {
-      href: '#',
-      text: 'Explore',
-      id: 'explore',
-      icon: BookOpen,
-      onClick: () => navigate('/explore'),
-    },
-    {
-      href: '#',
-      text: 'Upcoming Cohorts',
-      id: 'upcoming-cohorts',
-      icon: Settings,
-      onClick: () => navigate('/upcoming-cohorts'),
-    },
-  ];
+  /* Close dropdown on outside click */
+  useEffect(() => {
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
+        setShowUserMenu(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  /* Shadow on scroll */
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setShowUserMenu(false);
+    setIsMenuOpen(false);
     navigate('/login');
   };
 
-  const handleProfile = () => {
-    navigate('/profile');
-    setShowUserMenu(false);
-  };
+  const initials = user.fullName
+    ? user.fullName.trim().split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '?';
 
-  const handleHome = () => {
-    navigate('/home');
-    setIsMenuOpen(false);
-  };
+  const isActive = (path) => location.pathname === path;
 
   return (
     <>
       <motion.nav
-        className="sticky top-0 z-50 flex items-center justify-between w-full h-18 px-6 md:px-16 lg:px-24 xl:px-32 backdrop-blur bg-gradient-to-r from-slate-950 to-slate-900 border-b border-slate-700"
-        initial={{ y: -100, opacity: 0 }}
+        initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 250, damping: 70, mass: 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 60 }}
+        className={`fixed top-0 left-0 right-0 z-50 h-16 px-6 md:px-10 flex items-center justify-between
+          bg-[#010409]/95 backdrop-blur-md border-b border-[#21262d] transition-shadow duration-300
+          ${scrolled ? 'shadow-xl shadow-black/40' : ''}`}
       >
-        {/* Logo */}
+        {/* ── Logo ── */}
         <button
           onClick={() => navigate('/home')}
-          className="mr-20 flex-5 cursor-pointer hover:opacity-80 transition"
+          className="flex items-center gap-2.5 group shrink-0 mr-10"
         >
-          <img src={Logo} alt="logo" width="50%" height="10px" />
+          <img src={Logo} alt="logo" className="h-40 w-auto opacity-90 group-hover:opacity-100 transition-opacity" />
         </button>
 
-        {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center gap-8 transition duration-500 flex-1">
-          {navlinks.map((link) => {
-            const Icon = link.icon;
+        {/* ── Desktop nav links ── */}
+        <div className="hidden lg:flex items-center gap-1 flex-1">
+          {navlinks.map(({ id, text, icon: Icon, path }) => {
+            const active = isActive(path);
             return (
               <button
-                key={link.id}
-                onClick={link.onClick}
-                className="text-slate-300 hover:text-white transition duration-300 font-medium flex items-center gap-2 group"
+                key={id}
+                onClick={() => navigate(path)}
+                className={`relative flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-all duration-200 group ${
+                  active
+                    ? 'text-[#58a6ff] bg-[#1f6feb]/8'
+                    : 'text-[#7d8590] hover:text-[#c9d1d9] hover:bg-[#161b22]'
+                }`}
               >
-                <Icon className="w-4 h-4 group-hover:text-blue-400 transition" />
-                {link.text}
+                <Icon className={`w-3.5 h-3.5 transition-colors ${active ? 'text-[#58a6ff]' : 'group-hover:text-[#c9d1d9]'}`} />
+                {text}
+                {active && (
+                  <motion.span
+                    layoutId="nav-active-dot"
+                    className="absolute -bottom-[9px] left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#1f6feb]"
+                  />
+                )}
               </button>
             );
           })}
         </div>
 
-        {/* User Menu - Desktop */}
-        <div className="hidden lg:flex items-center space-x-4 ml-8">
-          <div className="relative inline-block">
-            <motion.button
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition text-white rounded-md font-medium flex items-center gap-2"
-            >
-              <User className="w-4 h-4" />
+        {/* ── Desktop user menu ── */}
+        <div className="hidden lg:flex items-center" ref={dropdownRef}>
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className={`flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl border transition-all duration-200 group ${
+              showUserMenu
+                ? 'bg-[#161b22] border-[#30363d]'
+                : 'bg-[#0d1117] border-[#21262d] hover:bg-[#161b22] hover:border-[#30363d]'
+            }`}
+          >
+            {/* Avatar */}
+            <div className="w-7 h-7 rounded-lg bg-[#1f6feb]/20 border border-[#1f6feb]/30 flex items-center justify-center text-[11px] font-bold font-mono text-[#58a6ff]">
+              {initials}
+            </div>
+            <span className="text-xs font-mono text-[#c9d1d9] max-w-[100px] truncate">
               {user.fullName?.split(' ')[0] || 'User'}
-            </motion.button>
+            </span>
+            <ChevronDown className={`w-3 h-3 text-[#484f58] transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
+          </button>
 
+          {/* Dropdown */}
+          <AnimatePresence>
             {showUserMenu && (
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-lg shadow-lg z-50"
+                initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-6 top-14 w-64 bg-[#0d1117] border border-[#21262d] rounded-2xl shadow-2xl shadow-black/60 overflow-hidden z-50"
               >
-                <div className="p-4 border-b border-slate-700">
-                  <p className="text-xs text-slate-400 uppercase tracking-wider">Signed in as</p>
-                  <p className="font-semibold text-white mt-1">{user.fullName}</p>
-                  <p className="text-sm text-slate-400">{user.email}</p>
+                {/* User info */}
+                <div className="px-4 py-4 border-b border-[#21262d]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#1f6feb]/15 border border-[#1f6feb]/25 flex items-center justify-center text-sm font-bold font-mono text-[#58a6ff]">
+                      {initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-[#e6edf3] truncate">{user.fullName}</p>
+                      <p className="text-[11px] font-mono text-[#7d8590] truncate">{user.email}</p>
+                    </div>
+                  </div>
+                  {user.isAdmin && (
+                    <div className="mt-2.5 inline-flex items-center gap-1 px-2 py-0.5 bg-[#d29922]/10 border border-[#d29922]/20 rounded-full">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#d29922]" />
+                      <span className="text-[10px] font-mono font-semibold text-[#d29922] uppercase tracking-wider">Admin</span>
+                    </div>
+                  )}
                 </div>
 
-                <button
-                  onClick={handleProfile}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition text-slate-200 font-medium flex items-center gap-3 border-b border-slate-700"
-                >
-                  <User className="w-4 h-4 text-blue-400" />
-                  View Profile
-                </button>
+                {/* Actions */}
+                <div className="p-1.5">
+                  <button
+                    onClick={() => { navigate('/profile'); setShowUserMenu(false); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#7d8590] hover:text-[#e6edf3] hover:bg-[#161b22] transition-all group"
+                  >
+                    <div className="p-1.5 rounded-lg bg-[#21262d] group-hover:bg-[#58a6ff]/10 transition-colors">
+                      <User className="w-3.5 h-3.5 group-hover:text-[#58a6ff] transition-colors" />
+                    </div>
+                    <span className="font-mono text-xs uppercase tracking-wider">View Profile</span>
+                  </button>
 
+                  <div className="my-1 mx-2 h-px bg-[#21262d]" />
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-[#7d8590] hover:text-[#f85149] hover:bg-[#f85149]/5 transition-all group"
+                  >
+                    <div className="p-1.5 rounded-lg bg-[#21262d] group-hover:bg-[#f85149]/10 transition-colors">
+                      <LogOut className="w-3.5 h-3.5 group-hover:text-[#f85149] transition-colors" />
+                    </div>
+                    <span className="font-mono text-xs uppercase tracking-wider">Sign Out</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ── Mobile hamburger ── */}
+        <button
+          onClick={() => setIsMenuOpen(true)}
+          className="lg:hidden p-2 rounded-lg hover:bg-[#161b22] border border-transparent hover:border-[#21262d] transition-all active:scale-90"
+        >
+          <MenuIcon className="w-5 h-5 text-[#7d8590]" />
+        </button>
+      </motion.nav>
+
+      {/* ── Mobile drawer ── */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMenuOpen(false)}
+              className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm lg:hidden"
+            />
+
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 35 }}
+              className="fixed top-0 right-0 bottom-0 z-[100] w-72 bg-[#0d1117] border-l border-[#21262d] flex flex-col lg:hidden"
+            >
+              {/* Drawer header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[#21262d]">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#1f6feb]/15 border border-[#1f6feb]/25 flex items-center justify-center text-sm font-bold font-mono text-[#58a6ff]">
+                    {initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#e6edf3] truncate">{user.fullName}</p>
+                    <p className="text-[10px] font-mono text-[#7d8590] truncate">{user.email}</p>
+                  </div>
+                </div>
                 <button
-                  onClick={() => navigate('/home')}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition text-slate-200 font-medium flex items-center gap-3 border-b border-slate-700"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-[#161b22] border border-transparent hover:border-[#21262d] transition-all"
                 >
-                  <Home className="w-4 h-4 text-blue-400" />
-                  Dashboard
+                  <XIcon className="w-4 h-4 text-[#7d8590]" />
+                </button>
+              </div>
+
+              {/* Nav links */}
+              <div className="flex-1 p-3 space-y-1">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-[#484f58] px-3 py-2">Navigation</p>
+                {navlinks.map(({ id, text, icon: Icon, path }) => {
+                  const active = isActive(path);
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => { navigate(path); setIsMenuOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all ${
+                        active
+                          ? 'bg-[#1f6feb]/10 border border-[#1f6feb]/20 text-[#58a6ff]'
+                          : 'text-[#7d8590] hover:text-[#e6edf3] hover:bg-[#161b22] border border-transparent'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span className="font-mono text-xs uppercase tracking-wider">{text}</span>
+                      {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#1f6feb]" />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Bottom actions */}
+              <div className="p-3 border-t border-[#21262d] space-y-1">
+                <button
+                  onClick={() => { navigate('/profile'); setIsMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm text-[#7d8590] hover:text-[#e6edf3] hover:bg-[#161b22] border border-transparent transition-all group"
+                >
+                  <div className="p-1.5 rounded-lg bg-[#21262d] group-hover:bg-[#58a6ff]/10 transition-colors">
+                    <User className="w-3.5 h-3.5 group-hover:text-[#58a6ff] transition-colors" />
+                  </div>
+                  <span className="font-mono text-xs uppercase tracking-wider">View Profile</span>
                 </button>
 
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition text-red-400 font-medium flex items-center gap-3"
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm text-[#7d8590] hover:text-[#f85149] hover:bg-[#f85149]/5 border border-transparent hover:border-[#f85149]/10 transition-all group"
                 >
-                  <LogOut className="w-4 h-4" />
-                  Logout
+                  <div className="p-1.5 rounded-lg bg-[#21262d] group-hover:bg-[#f85149]/10 transition-colors">
+                    <LogOut className="w-3.5 h-3.5 group-hover:text-[#f85149] transition-colors" />
+                  </div>
+                  <span className="font-mono text-xs uppercase tracking-wider">Sign Out</span>
                 </button>
-              </motion.div>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMenuOpen(true)}
-          className="lg:hidden active:scale-90 transition"
-        >
-          <MenuIcon className="size-6 text-white" />
-        </button>
-      </motion.nav>
-
-      {/* Mobile Menu */}
-      <motion.div
-        className={`fixed inset-0 z-[100] bg-black/90 backdrop-blur flex flex-col items-center justify-center text-lg gap-8 lg:hidden transition-all duration-400 ${
-          isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'
-        }`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isMenuOpen ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        {navlinks.map((link) => {
-          const Icon = link.icon;
-          return (
-            <button
-              key={link.id}
-              onClick={() => {
-                link.onClick();
-                setIsMenuOpen(false);
-              }}
-              className="text-white hover:text-blue-400 transition duration-300 font-medium text-xl flex items-center gap-2"
-            >
-              <Icon className="w-5 h-5" />
-              {link.text}
-            </button>
-          );
-        })}
-
-        <div className="border-t border-slate-700 pt-8 w-full max-w-xs">
-          <div className="p-4 bg-slate-800 rounded-lg mb-4 text-center">
-            <p className="text-xs text-slate-400 uppercase tracking-wider">Signed in as</p>
-            <p className="font-semibold text-white mt-1">{user.fullName}</p>
-          </div>
-
-          <button
-            onClick={handleProfile}
-            className="w-full px-6 py-3 bg-slate-700 hover:bg-slate-600 transition text-white rounded-md active:scale-95 font-medium flex items-center gap-2 justify-center mb-2"
-          >
-            <User className="w-4 h-4" />
-            Profile
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="w-full px-6 py-3 bg-red-600/20 hover:bg-red-600/30 transition text-red-400 rounded-md active:scale-95 font-medium flex items-center gap-2 justify-center border border-red-600/50"
-          >
-            <LogOut className="w-4 h-4" />
-            Logout
-          </button>
-        </div>
-
-        <button
-          onClick={() => setIsMenuOpen(false)}
-          className="active:ring-3 active:ring-white absolute top-6 right-6 aspect-square size-10 p-1 items-center justify-center bg-slate-100 hover:bg-slate-200 transition text-black rounded-md flex"
-        >
-          <XIcon />
-        </button>
-      </motion.div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

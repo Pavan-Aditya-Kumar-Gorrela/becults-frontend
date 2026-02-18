@@ -1,72 +1,118 @@
 import { motion } from 'framer-motion';
-import Logo from '../assets/logo.jpg'
+import { ArrowUpRight, Github, Linkedin, Twitter, Mail } from 'lucide-react';
+import Logo from '../assets/logo.jpg';
+import toast from 'react-hot-toast';
+
+const companyLinks = [
+  { label: 'About Us',       href: '/' },
+  { label: 'Careers',        href: '/careers', badge: "We're hiring" },
+  { label: 'Contact Us',     href: '/' },
+  { label: 'Privacy Policy', href: '/' },
+];
+
+const socialLinks = [
+  { icon: Github,   href: '#',   label: 'GitHub'   },
+  { icon: Linkedin, href: 'https://www.linkedin.com/in/becults/', label: 'LinkedIn' },
+  { icon: Twitter,  href: '#',   label: 'Twitter'  },
+];
+
 export default function Footer() {
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    toast.success("Subscribed to NewsLetter");
+    
+    // hook up real logic here
+  };
+
   return (
     <motion.footer
-      className="px-6 md:px-16 lg:px-24 xl:px-32 w-full text-sm text-slate-400 mt-40"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 1 }}
+      transition={{ duration: 0.6 }}
+      className="relative mt-24 border-t border-[#21262d] bg-[#010409]"
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14">
-        <div className="sm:col-span-2 lg:col-span-1">
-          <a href='https://www.linkedin.com/in/becults/' className='mt-10'>
-          <img src={Logo} alt="logo" width="45%" />
-        </a>
-          <p className="text-sm/7 mt-0">
-            PrebuiltUI is a free and open-source UI component library with over
-            300+ beautifully crafted, customizable components built with
-            Tailwind CSS.
-          </p>
-        </div>
-        <div className="flex flex-col lg:items-center lg:justify-center mt-20">
-          <div className="flex flex-col text-sm space-y-2.5">
-            <h2 className="font-semibold mb-5 text-white">Company</h2>
-            <a className="hover:text-slate-500 transition" href="#">
-              About us
+      {/* Top glow line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#1f6feb]/30 to-transparent" />
+
+      <div className="max-w-7xl mx-auto px-6 md:px-10 pt-14 pb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 mb-12">
+
+          {/* ── Brand col ── */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <a href="/home" className="inline-block  opacity-80 hover:opacity-100 transition-opacity">
+              <img src={Logo} alt="logo" className="h-20 w-auto" />
             </a>
-            <a className="hover:text-slate-500 transition" href="#">
-              Careers
-              <span className="text-xs text-white bg-indigo-600 rounded-md ml-2 px-2 py-1">
-                We’re hiring!
-              </span>
-            </a>
-            <a className="hover:text-slate-500 transition" href="#">
-              Contact us
-            </a>
-            <a className="hover:text-slate-500 transition" href="#">
-              Privacy policy
-            </a>
+            <p className="text-xs font-mono text-[#7d8590] leading-relaxed max-w-xs">
+              A structured cohort-based learning platform where students collaborate,
+              build real skills, and grow together under expert guidance.
+            </p>
+
+            {/* Social icons */}
+            <div className="flex items-center gap-2 mt-6">
+              {socialLinks.map(({ icon: Icon, href, label }) => (
+                <a key={label} href={href} aria-label={label} target="_blank" rel="noopener noreferrer"
+                  className="p-2 bg-[#0d1117] border border-[#21262d] rounded-lg text-[#7d8590] hover:text-[#e6edf3] hover:border-[#30363d] transition-all duration-200">
+                  <Icon className="w-3.5 h-3.5" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Company links ── */}
+          <div>
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-1 h-4 bg-[#1f6feb] rounded-full" />
+              <h2 className="text-xs font-mono font-semibold text-[#e6edf3] uppercase tracking-widest">Company</h2>
+            </div>
+            <ul className="space-y-2.5">
+              {companyLinks.map(({ label, href, badge }) => (
+                <li key={label}>
+                  <a href={href}
+                    className="group inline-flex items-center gap-2 text-xs font-mono text-[#7d8590] hover:text-[#e6edf3] transition-colors duration-200">
+                    <span>{label}</span>
+                    {badge && (
+                      <span className="px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider bg-[#1f6feb]/15 border border-[#1f6feb]/25 text-[#58a6ff] rounded-md">
+                        {badge}
+                      </span>
+                    )}
+                    <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ── Newsletter ── */}
+          <div>
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-1 h-4 bg-[#3fb950] rounded-full" />
+              <h2 className="text-xs font-mono font-semibold text-[#e6edf3] uppercase tracking-widest">Community</h2>
+            </div>
+            <p className="text-xs font-mono text-[#7d8590] leading-relaxed mb-5">
+            Latest cohort launches, curated learning resources, exclusive opportunities, and important updates — delivered straight to your inbox every week.
+
+Stay connected with mentors, discover new events, access member-only content, and never miss announcements that help you grow professionally and personally.
+            </p>
+            
           </div>
         </div>
-        <div>
-          <h2 className="font-semibold text-white mb-5 mt-20">
-            Subscribe to our newsletter
-          </h2>
-          <div className="text-sm space-y-6 max-w-sm">
-            <p>
-              The latest news, articles, and resources, sent to your inbox
-              weekly.
-            </p>
-            <div className="flex items-center justify-center gap-2 p-2 rounded-md bg-slate-900">
-              <input
-                className="outline-none w-full max-w-64 py-2 rounded px-2"
-                type="email"
-                placeholder="Enter your email"
-              />
-              <button className="bg-indigo-600 px-4 py-2 text-white rounded">
-                Subscribe
-              </button>
-            </div>
+
+        {/* ── Bottom bar ── */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3  border-t border-[#21262d]">
+          <p className="text-[10px] font-mono text-[#484f58]">
+            © 2026 All rights reserved · Built with ❤️
+          </p>
+          <div className="flex items-center gap-4">
+            {['Terms', 'Privacy', 'Cookies'].map((item) => (
+              <a key={item} href="#"
+                className="text-[10px] font-mono text-[#484f58] hover:text-[#7d8590] transition-colors">
+                {item}
+              </a>
+            ))}
           </div>
         </div>
       </div>
-      <p className="py-4 text-center border-t mt-6 border-slate-700">
-        Copyright 2025 ©{'Built with ❤️'}
-         All
-        Right Reserved.
-      </p>
     </motion.footer>
   );
 }

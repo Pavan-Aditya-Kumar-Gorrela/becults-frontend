@@ -1,267 +1,309 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  BookOpen, Code, Users, Zap, Award, TrendingUp, LogOut,
-  ChevronRight, Play, Star, Lock, Globe, MessageSquare
+import {
+  BookOpen, Code, Users, Zap, Award, TrendingUp,
+  ChevronRight, Play, Star, Lock, Globe, MessageSquare,
+  ArrowUpRight, Terminal, Cpu, Layers, Activity,
 } from 'lucide-react';
 import LoggedInNavbar from '../components/LoggedInNavbar';
 import Footer from '../components/footer';
+import { cohortAPI } from '../services/api';
 
+/* ─── Reusable atoms ──────────────────────────────────────── */
+const stagger = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+const rise = {
+  hidden: { opacity: 0, y: 18 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
+};
+
+const categoryStyleMap = {
+  'Web Development':  { icon: Code,        accent: '#58a6ff', glyph: '</>' },
+  'Mobile Apps':      { icon: Globe,       accent: '#a371f7', glyph: '◈'  },
+  'Data Science':     { icon: TrendingUp,  accent: '#3fb950', glyph: '∑'  },
+  'UI/UX Design':     { icon: Layers,      accent: '#f778ba', glyph: '◉'  },
+  'Cloud Computing':  { icon: Lock,        accent: '#ffa657', glyph: '⬡'  },
+  'AI & ML':          { icon: Cpu,         accent: '#ff7b72', glyph: '⬡'  },
+  default:            { icon: BookOpen,    accent: '#7d8590', glyph: '●'  },
+};
+
+function StatCard({ icon: Icon, label, value, accent }) {
+  return (
+    <motion.div
+      variants={rise}
+      className="relative bg-[#0d1117] border border-[#21262d] rounded-2xl p-5 overflow-hidden group hover:border-[#30363d] transition-all duration-300"
+    >
+      {/* subtle glow */}
+      <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"
+        style={{ background: accent }} />
+      <div className="relative">
+        <div className="flex items-center justify-between mb-4">
+          <div className="p-2 rounded-xl" style={{ background: `${accent}18` }}>
+            <Icon className="w-4 h-4" style={{ color: accent }} />
+          </div>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#484f58] bg-[#161b22] px-2 py-0.5 rounded-full border border-[#21262d]">live</span>
+        </div>
+        <p className="text-2xl font-bold text-[#e6edf3] font-mono mb-0.5">{value}</p>
+        <p className="text-xs text-[#7d8590] uppercase tracking-wider">{label}</p>
+      </div>
+    </motion.div>
+  );
+}
+
+function CourseCard({ course, idx, onClick }) {
+  const CourseIcon = course.icon;
+  return (
+    <motion.div
+      variants={rise}
+      onClick={onClick}
+      className="group bg-[#0d1117] border border-[#21262d] rounded-2xl overflow-hidden hover:border-[#30363d] hover:shadow-xl hover:shadow-black/40 transition-all duration-300 cursor-pointer"
+    >
+      {/* Thumbnail */}
+      <div className="relative h-36 overflow-hidden flex items-center justify-center"
+        style={{ background: `linear-gradient(135deg, ${course.accent}22, ${course.accent}08)` }}>
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{ backgroundImage: 'linear-gradient(#e6edf3 1px, transparent 1px), linear-gradient(90deg, #e6edf3 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        <span className="text-6xl font-bold opacity-10 font-mono select-none" style={{ color: course.accent }}>
+          {course.glyph}
+        </span>
+        <CourseIcon className="absolute w-10 h-10 opacity-30 group-hover:opacity-50 group-hover:scale-110 transition-all duration-300"
+          style={{ color: course.accent }} />
+        <div className="absolute top-3 right-3 bg-[#0d1117]/80 backdrop-blur-sm border border-[#21262d] rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Play className="w-3 h-3 fill-current text-[#e6edf3]" />
+        </div>
+        <div className="absolute bottom-3 left-3">
+          <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full border"
+            style={{ color: course.accent, borderColor: `${course.accent}40`, background: `${course.accent}15` }}>
+            {course.category}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-4">
+        <h3 className="text-sm font-semibold text-[#e6edf3] mb-3 line-clamp-2 leading-snug">{course.title}</h3>
+        <div className="flex items-center justify-between text-xs border-t border-[#21262d] pt-3">
+          <div className="flex items-center gap-1 text-[#d29922]">
+            <Star className="w-3 h-3 fill-current" />
+            <span className="font-mono text-[#e6edf3]">{course.rating}</span>
+          </div>
+          <span className="text-[#484f58] font-mono">{course.students.toLocaleString()} enrolled</span>
+          <ArrowUpRight className="w-3 h-3 text-[#484f58] group-hover:text-[#58a6ff] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function CategoryPill({ name, style, onClick }) {
+  const Icon = style.icon;
+  return (
+    <motion.button
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={onClick}
+      className="group flex flex-col items-center gap-2 p-5 bg-[#0d1117] border border-[#21262d] rounded-2xl hover:border-[#30363d] transition-all duration-200 cursor-pointer"
+    >
+      <div className="p-2.5 rounded-xl transition-colors" style={{ background: `${style.accent}18` }}>
+        <Icon className="w-5 h-5 transition-colors" style={{ color: style.accent }} />
+      </div>
+      <span className="text-xs font-medium text-[#7d8590] group-hover:text-[#e6edf3] transition-colors text-center leading-tight">{name}</span>
+    </motion.button>
+  );
+}
+
+/* ─── Main Component ──────────────────────────────────────── */
 export default function Home() {
   const [user, setUser] = useState(null);
+  const [allCohorts, setAllCohorts] = useState([]);
+  const [enrolledCohorts, setEnrolledCohorts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [progressMap, setProgressMap] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get user data from localStorage
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-
-    // Check if token exists, if not redirect to login
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-    }
-
-    window.scrollTo(0, 0);
+    const init = async () => {
+      const userData = localStorage.getItem('user');
+      if (userData) setUser(JSON.parse(userData));
+      const token = localStorage.getItem('token');
+      if (!token) { navigate('/login'); return; }
+      setIsLoading(true);
+      try {
+        const [allRes, enrolledRes] = await Promise.all([
+          cohortAPI.getAllCohorts(),
+          cohortAPI.getUserEnrolledCohorts().catch(() => ({ data: [] })),
+        ]);
+        setAllCohorts(allRes.data || []);
+        setEnrolledCohorts(enrolledRes.data || []);
+        setProgressMap(JSON.parse(localStorage.getItem('cohortProgress') || '{}'));
+      } catch (err) {
+        setError(err.message || 'Failed to load dashboard.');
+      } finally {
+        setIsLoading(false);
+        window.scrollTo(0, 0);
+      }
+    };
+    init();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
+  const categoryList = useMemo(() => {
+    const names = new Set(allCohorts.map((c) => c.category).filter(Boolean));
+    return names.size === 0
+      ? ['Web Development', 'Mobile Apps', 'Data Science', 'UI/UX Design', 'Cloud Computing', 'AI & ML']
+      : Array.from(names);
+  }, [allCohorts]);
 
-  const courses = [
-    {
-      id: 1,
-      title: 'Web Development Fundamentals',
-      category: 'Web Development',
-      level: 'Beginner',
-      students: 2451,
-      rating: 4.8,
-      image: 'bg-gradient-to-br from-blue-600 to-blue-900',
-      progress: 65,
-      icon: Code
-    },
-    {
-      id: 2,
-      title: 'Advanced JavaScript & React',
-      category: 'Frontend',
-      level: 'Intermediate',
-      students: 1834,
-      rating: 4.9,
-      image: 'bg-gradient-to-br from-purple-600 to-purple-900',
-      progress: 42,
-      icon: Zap
-    },
-    {
-      id: 3,
-      title: 'Full Stack Development',
-      category: 'Full Stack',
-      level: 'Advanced',
-      students: 1205,
-      rating: 4.7,
-      image: 'bg-gradient-to-br from-green-600 to-green-900',
-      progress: 28,
-      icon: Globe
-    },
-    {
-      id: 4,
-      title: 'Data Science & Machine Learning',
-      category: 'Data Science',
-      level: 'Advanced',
-      students: 1567,
-      rating: 4.9,
-      image: 'bg-gradient-to-br from-orange-600 to-orange-900',
-      progress: 0,
-      icon: TrendingUp
-    },
-  ];
+  const quickStats = useMemo(() => [
+    { icon: BookOpen,   label: 'Enrolled',       value: String(enrolledCohorts.length),                                                          accent: '#58a6ff' },
+    { icon: Award,      label: 'Active Cohorts',  value: String(allCohorts.length),                                                               accent: '#a371f7' },
+    { icon: Users,      label: 'Community',       value: String(new Set(allCohorts.flatMap((c) => c.enrolledUsers || [])).size || 0),              accent: '#3fb950' },
+    { icon: Activity,   label: 'Status',          value: enrolledCohorts.length > 0 ? 'Active' : 'Start now',                                     accent: '#ffa657' },
+  ], [allCohorts, enrolledCohorts]);
 
-  const categories = [
-    { name: 'Web Development', icon: Code, color: 'from-blue-500 to-blue-600' },
-    { name: 'Mobile Apps', icon: Globe, color: 'from-purple-500 to-purple-600' },
-    { name: 'Data Science', icon: TrendingUp, color: 'from-green-500 to-green-600' },
-    { name: 'UI/UX Design', icon: BookOpen, color: 'from-pink-500 to-pink-600' },
-    { name: 'Cloud Computing', icon: Lock, color: 'from-orange-500 to-orange-600' },
-    { name: 'AI & ML', icon: Zap, color: 'from-red-500 to-red-600' },
-  ];
+  const courses = useMemo(() => {
+    const base = enrolledCohorts.length > 0 ? enrolledCohorts : allCohorts;
+    return (base || []).slice(0, 4).map((cohort) => {
+      const style = categoryStyleMap[cohort.category] || categoryStyleMap.default;
+      return {
+        id: cohort._id,
+        title: cohort.title,
+        category: cohort.category || 'General',
+        students: (cohort.enrolledUsers || []).length,
+        rating: 4.8,
+        icon: style.icon,
+        accent: style.accent,
+        glyph: style.glyph,
+        progress: typeof progressMap[cohort._id] === 'number' ? Math.min(Math.max(progressMap[cohort._id], 0), 100) : 0,
+      };
+    });
+  }, [allCohorts, enrolledCohorts, progressMap]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
+  const firstName = user?.fullName?.split(' ')[0] || 'Learner';
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#010409] flex flex-col">
+        <LoggedInNavbar />
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          <div className="relative w-10 h-10">
+            <div className="absolute inset-0 rounded-full border-2 border-[#1f6feb]/20"></div>
+            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#58a6ff] animate-spin"></div>
+          </div>
+          <p className="text-[#7d8590] text-xs uppercase tracking-widest font-mono">Initializing dashboard...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-[#010409] text-[#e6edf3]">
       <LoggedInNavbar />
 
-      {/* Hero Section */}
-      <section className="pt-20 pb-20 px-6 md:px-16 lg:px-24 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: '50px 50px'
-          }}></div>
-        </div>
+      {/* Fixed background */}
+      <div className="fixed inset-0 pointer-events-none -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_-10%,rgba(31,111,235,0.07),transparent)]"></div>
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#1f6feb]/30 to-transparent"></div>
+        <div className="absolute inset-0 opacity-[0.012]"
+          style={{ backgroundImage: 'linear-gradient(#58a6ff 1px, transparent 1px), linear-gradient(90deg, #58a6ff 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+      </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto">
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <section className="pt-28 pb-16 px-6 md:px-16 lg:px-24">
+        <div className="max-w-7xl mx-auto">
+
+          {/* Greeting */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            transition={{ duration: 0.5 }}
+            className="mb-12"
           >
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              Welcome back, <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                {user?.fullName || 'Learner'}
+            <div className="flex items-center gap-2 mb-3">
+              <Terminal className="w-4 h-4 text-[#58a6ff]" />
+              <span className="text-[#7d8590] text-xs font-mono uppercase tracking-widest">dashboard</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-[#e6edf3] tracking-tight mb-3">
+              Welcome back,{' '}
+              <span className="relative inline-block">
+                <span className="text-[#58a6ff]">{firstName}</span>
+                <span className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-[#1f6feb] to-transparent"></span>
               </span>
             </h1>
-            <p className="text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
-              Continue your learning journey with our cutting-edge courses and connect with thousands of students worldwide.
+            <p className="text-[#7d8590] text-base max-w-xl font-mono leading-relaxed">
+              Pick up where you left off — your cohorts and community are waiting.
             </p>
           </motion.div>
 
-          {/* Quick Stats */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16"
-          >
-            {[
-              { icon: BookOpen, label: 'Courses Enrolled', value: '4', color: 'from-blue-500' },
-              { icon: Award, label: 'Certificates Earned', value: '2', color: 'from-purple-500' },
-              { icon: TrendingUp, label: 'Learning Streak', value: '12 days', color: 'from-green-500' },
-              { icon: Users, label: 'Community Members', value: '24.5k', color: 'from-orange-500' },
-            ].map((stat, idx) => {
-              const Icon = stat.icon;
-              return (
-                <motion.div
-                  key={idx}
-                  variants={itemVariants}
-                  className={`bg-gradient-to-br ${stat.color} to-transparent p-6 rounded-lg border border-slate-800 hover:border-slate-700 transition`}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <Icon className="w-8 h-8 text-white" />
-                    <span className="text-xs px-3 py-1 bg-white/10 rounded-full text-slate-300">This month</span>
-                  </div>
-                  <p className="text-3xl font-bold text-white mb-1">{stat.value}</p>
-                  <p className="text-slate-400">{stat.label}</p>
-                </motion.div>
-              );
-            })}
-          </motion.div>
+          {/* Stats */}
+          {error ? (
+            <div className="mb-10 p-4 bg-[#f85149]/5 border border-[#f85149]/20 rounded-xl text-[#f85149] text-sm font-mono">{error}</div>
+          ) : (
+            <motion.div
+              variants={stagger} initial="hidden" animate="visible"
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-14"
+            >
+              {quickStats.map((s) => <StatCard key={s.label} {...s} />)}
+            </motion.div>
+          )}
 
-          {/* Continue Learning Section */}
+          {/* Continue Learning */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="mb-20"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}
+            className="mb-16"
           >
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-white">Continue Learning</h2>
-              <a href="#" className="text-blue-400 hover:text-blue-300 flex items-center gap-2 transition">
-                View All <ChevronRight className="w-4 h-4" />
-              </a>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-5 bg-[#1f6feb] rounded-full"></div>
+                <h2 className="text-lg font-semibold text-[#e6edf3]">
+                  {enrolledCohorts.length > 0 ? 'Continue Learning' : 'Explore Cohorts'}
+                </h2>
+              </div>
+              <button
+                onClick={() => navigate('/explore')}
+                className="flex items-center gap-1.5 text-xs text-[#58a6ff] hover:text-[#79c0ff] font-mono uppercase tracking-wider transition-colors group"
+              >
+                View all <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {courses.map((course, idx) => {
-                const CourseIcon = course.icon;
-                return (
-                  <motion.div
-                    key={course.id}
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ delay: idx * 0.1 }}
-                    className="group bg-slate-900 border border-slate-800 rounded-lg overflow-hidden hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10 transition cursor-pointer"
-                  >
-                    <div className={`${course.image} h-32 flex items-end justify-end p-4 relative overflow-hidden`}>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <CourseIcon className="w-12 h-12 text-white/30 group-hover:scale-110 transition" />
-                      </div>
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        className="bg-white/10 hover:bg-white/20 p-2 rounded-full transition"
-                      >
-                        <Play className="w-4 h-4 text-white fill-white" />
-                      </motion.div>
-                    </div>
-
-                    <div className="p-4">
-                      <p className="text-xs text-blue-400 mb-2">{course.category}</p>
-                      <h3 className="text-lg font-semibold text-white mb-3 line-clamp-2">{course.title}</h3>
-
-                      {/* Progress Bar */}
-                      <div className="mb-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs text-slate-400">{course.level}</span>
-                          <span className="text-xs text-slate-300 font-semibold">{course.progress}%</span>
-                        </div>
-                        <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${course.progress}%` }}
-                            transition={{ delay: idx * 0.1 + 0.3, duration: 0.8 }}
-                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
-                          ></motion.div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-3 border-t border-slate-800">
-                        <div className="flex items-center gap-2">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm text-slate-300">{course.rating}</span>
-                        </div>
-                        <span className="text-xs text-slate-500">{course.students.toLocaleString()} students</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+            {courses.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 bg-[#0d1117] border border-[#21262d] border-dashed rounded-2xl">
+                <BookOpen className="w-8 h-8 text-[#30363d] mb-3" />
+                <p className="text-[#7d8590] text-sm font-mono">No cohorts available yet</p>
+                <button onClick={() => navigate('/explore')}
+                  className="mt-4 px-4 py-2 bg-[#1f6feb] hover:bg-[#388bfd] rounded-lg text-sm font-semibold transition-colors">
+                  Browse Courses
+                </button>
+              </div>
+            ) : (
+              <motion.div variants={stagger} initial="hidden" animate="visible"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {courses.map((course, idx) => (
+                  <CourseCard key={course.id} course={course} idx={idx}
+                    onClick={() => navigate(`/cohort/${course.id}`)} />
+                ))}
+              </motion.div>
+            )}
           </motion.div>
 
-          {/* Categories Section */}
+          {/* Categories */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}
           >
-            <h2 className="text-3xl font-bold text-white mb-8">Explore Categories</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {categories.map((cat, idx) => {
-                const Icon = cat.icon;
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-5 bg-[#a371f7] rounded-full"></div>
+              <h2 className="text-lg font-semibold text-[#e6edf3]">Explore Categories</h2>
+            </div>
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+              {categoryList.map((name) => {
+                const style = categoryStyleMap[name] || categoryStyleMap.default;
                 return (
-                  <motion.div
-                    key={idx}
-                    whileHover={{ scale: 1.05 }}
-                    className={`bg-gradient-to-br ${cat.color} p-6 rounded-lg cursor-pointer hover:shadow-lg hover:shadow-current/50 transition group`}
-                  >
-                    <Icon className="w-8 h-8 text-white mb-3 group-hover:scale-110 transition" />
-                    <p className="text-sm font-semibold text-white text-center">{cat.name}</p>
-                  </motion.div>
+                  <CategoryPill key={name} name={name} style={style}
+                    onClick={() => navigate(`/explore?category=${encodeURIComponent(name)}`)} />
                 );
               })}
             </div>
@@ -269,122 +311,76 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Section */}
-      <section className="py-20 px-6 md:px-16 lg:px-24 bg-gradient-to-b from-slate-900 to-slate-950 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: '50px 50px'
-          }}></div>
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto">
+      {/* ── Why Choose Us ───────────────────────────────────── */}
+      <section className="py-20 px-6 md:px-16 lg:px-24 mt-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Section header */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            transition={{ duration: 0.5 }}
+            className="mb-10"
           >
-            <h2 className="text-4xl font-bold text-white mb-4">Why Choose Our Courses?</h2>
-            <p className="text-xl text-slate-400">Industry-leading content from expert instructors</p>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-1 h-5 bg-[#3fb950] rounded-full"></div>
+              <span className="text-xs font-mono uppercase tracking-widest text-[#7d8590]">Platform benefits</span>
+            </div>
+            <h2 className="text-2xl font-bold text-[#e6edf3]">Why learn with us?</h2>
           </motion.div>
 
           <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
           >
             {[
-              {
-                icon: Lock,
-                title: 'Industry-Relevant',
-                description: 'Learn skills that are in high demand in the current job market'
-              },
-              {
-                icon: Users,
-                title: 'Expert Instructors',
-                description: 'Learn from professionals working at top tech companies'
-              },
-              {
-                icon: Award,
-                title: 'Certifications',
-                description: 'Earn recognized certificates to boost your career prospects'
-              },
-              {
-                icon: MessageSquare,
-                title: 'Community Support',
-                description: 'Connect with thousands of learners and get help when you need it'
-              },
-              {
-                icon: Zap,
-                title: 'Flexible Learning',
-                description: 'Learn at your own pace with lifetime access to courses'
-              },
-              {
-                icon: TrendingUp,
-                title: 'Career Growth',
-                description: 'Access job opportunities and career advancement resources'
-              },
-            ].map((feature, idx) => {
-              const Icon = feature.icon;
-              return (
-                <motion.div
-                  key={idx}
-                  variants={itemVariants}
-                  className="bg-slate-900 border border-slate-800 rounded-lg p-8 hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10 transition group"
-                >
-                  <div className="bg-gradient-to-br from-blue-500 to-purple-500 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition">
-                    <Icon className="w-6 h-6 text-white" />
+              { icon: MessageSquare, accent: '#58a6ff', title: 'Community Support', desc: 'Connect with thousands of learners. Get unblocked fast with peer and mentor help in dedicated channels.' },
+              { icon: Zap,           accent: '#a371f7', title: 'Flexible Learning',  desc: 'Self-paced cohorts with lifetime access. Learn on your schedule without falling behind.' },
+              { icon: TrendingUp,    accent: '#3fb950', title: 'Career Growth',       desc: 'Real-world projects, portfolio reviews, and direct access to hiring partners.' },
+            ].map(({ icon: Icon, accent, title, desc }) => (
+              <motion.div key={title} variants={rise}
+                className="group relative bg-[#0d1117] border border-[#21262d] rounded-2xl p-6 hover:border-[#30363d] transition-all duration-300 overflow-hidden">
+                <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity"
+                  style={{ background: accent }} />
+                <div className="relative">
+                  <div className="p-2.5 rounded-xl w-fit mb-4" style={{ background: `${accent}18` }}>
+                    <Icon className="w-5 h-5" style={{ color: accent }} />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                  <p className="text-slate-400">{feature.description}</p>
-                </motion.div>
-              );
-            })}
+                  <h3 className="font-semibold text-[#e6edf3] mb-2">{title}</h3>
+                  <p className="text-sm text-[#7d8590] leading-relaxed">{desc}</p>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6 md:px-16 lg:px-24 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: '50px 50px'
-          }}></div>
+      {/* ── CTA strip ───────────────────────────────────────── */}
+      <section className="py-16 px-6 md:px-16 lg:px-24">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="relative bg-[#0d1117] border border-[#21262d] rounded-2xl p-8 md:p-12 overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_0%_50%,rgba(31,111,235,0.06),transparent)]"></div>
+            <div className="relative">
+              <p className="text-xs font-mono uppercase tracking-widest text-[#7d8590] mb-2">Ready to level up?</p>
+              <h3 className="text-2xl font-bold text-[#e6edf3]">Start your next cohort today</h3>
+              <p className="text-[#7d8590] text-sm mt-1">Join thousands of learners accelerating their careers.</p>
+            </div>
+            <div className="relative flex gap-3 shrink-0">
+              <button
+                onClick={() => navigate('/explore')}
+                className="px-5 py-2.5 bg-[#1f6feb] hover:bg-[#388bfd] rounded-xl font-semibold text-sm text-white transition-all shadow-lg shadow-[#1f6feb]/20 hover:shadow-[#1f6feb]/30 active:scale-[0.98]"
+              >
+                Browse Cohorts
+              </button>
+              
+            </div>
+          </motion.div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="relative z-10 max-w-4xl mx-auto text-center"
-        >
-          <h2 className="text-4xl font-bold text-white mb-6">Ready to Level Up Your Skills?</h2>
-          <p className="text-xl text-slate-400 mb-8">Explore our full catalog of courses and start learning today</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition"
-            >
-              Explore All Courses
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleLogout}
-              className="px-8 py-3 bg-slate-800 text-white font-semibold rounded-lg border border-slate-700 hover:border-slate-600 hover:bg-slate-700 transition flex items-center justify-center gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </motion.button>
-          </div>
-        </motion.div>
       </section>
 
       <Footer />
