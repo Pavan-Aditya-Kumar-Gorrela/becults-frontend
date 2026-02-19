@@ -8,7 +8,6 @@ const navlinks = [
   { href: '#cohorts', text: 'Cohorts', id: 'cohorts' },
   { href: '#about', text: 'About', id: 'about' },
   { href: '#testimonials', text: 'Testimonials', id: 'testimonials' },
-  { href: '#contact', text: 'Contact', id: 'contact' },
   { href: '#meet-our-team', text: 'Meet Our Team', id: 'meet-our-team', path: '/meet-our-team' },
 ];
 

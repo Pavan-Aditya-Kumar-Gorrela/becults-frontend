@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import OurTestimonials from './sections/our-testimonials';
 import SubscribeNewsletter from './sections/subscribe-newsletter';
 import Footer from './components/footer';
@@ -24,6 +25,16 @@ import NotFoundPage from './pages/404NotFoundPage';
 import MeetOurTeam from './components/meet-our-team';
 import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function LandingPage() {
   return (
     <>
@@ -43,28 +54,31 @@ function LandingPage() {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/meet-our-team" element={<MeetOurTeam/>}/>
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<SignUp />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/auth/github/callback" element={<GitHubCallback />} />
-      <Route path="*" element={<NotFoundPage />} />
-      
-      {/* User Routes */}
-      <Route path="/home" element={<ProtectedRoute element={<Home />} />} />
-      <Route path="/explore" element={<ProtectedRoute element={<Explore />} />} />
-      <Route path="/upcoming-cohorts" element={<ProtectedRoute element={<UpcomingCohorts />} />} />
-      <Route path="/cohort/:cohortId" element={<ProtectedRoute element={<CohortDetail />} />} />
-      <Route path="/profile" element={<ProtectedRoute element={<ProfilePage />} />} />
-      
-      {/* Admin Routes */}
-      <Route path="/admin/login" element={<AdminLoginPage />} />
-      <Route path="/admin/dashboard" element={<AdminRoute element={<AdminDashboard />} />} />
-      <Route path="/admin/cohorts" element={<AdminRoute element={<AdminCohortPanel />} />} />
-      <Route path="/admin/channels" element={<AdminRoute element={<AdminCommunityChannels />} />} />
-      <Route path="/admin/settings" element={<AdminRoute element={<AdminSettings />} />} />
-    </Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/meet-our-team" element={<MeetOurTeam />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/auth/github/callback" element={<GitHubCallback />} />
+        <Route path="*" element={<NotFoundPage />} />
+
+        {/* User Routes */}
+        <Route path="/home" element={<ProtectedRoute element={<Home />} />} />
+        <Route path="/explore" element={<ProtectedRoute element={<Explore />} />} />
+        <Route path="/upcoming-cohorts" element={<ProtectedRoute element={<UpcomingCohorts />} />} />
+        <Route path="/cohort/:cohortId" element={<ProtectedRoute element={<CohortDetail />} />} />
+        <Route path="/profile" element={<ProtectedRoute element={<ProfilePage />} />} />
+
+        {/* Admin Routes */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/dashboard" element={<AdminRoute element={<AdminDashboard />} />} />
+        <Route path="/admin/cohorts" element={<AdminRoute element={<AdminCohortPanel />} />} />
+        <Route path="/admin/channels" element={<AdminRoute element={<AdminCommunityChannels />} />} />
+        <Route path="/admin/settings" element={<AdminRoute element={<AdminSettings />} />} />
+      </Routes>
+    </>
   );
 }
