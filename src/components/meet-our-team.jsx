@@ -6,7 +6,8 @@ import RamCharan from "../assets/ramcharan.png";
 import Pranav from "../assets/pranav.jpeg";
 import Ishvar from "../assets/ishvar.jpeg";
 import Gayaz from "../assets/gayaz.jpeg";
-import Vishnu from "../assets/admin_model.png"
+import Vishnu from "../assets/vishnu.jpeg"
+
 export default function MeetOurTeam() {
   return (
       <>
