@@ -5,11 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/logo.jpg';
 
 const navlinks = [
-  { href: '#cohorts',      text: 'Cohorts',      id: 'cohorts'      },
-  { href: '#about',        text: 'About',        id: 'about'        },
+  { href: '#cohorts', text: 'Cohorts', id: 'cohorts' },
+  { href: '#about', text: 'About', id: 'about' },
   { href: '#testimonials', text: 'Testimonials', id: 'testimonials' },
-  { href: '#contact',      text: 'Contact',      id: 'contact'      },
-  { href: '#meet-our-team', text: 'Meet Our Team', id:'meet-our-team'},
+  { href: '#contact', text: 'Contact', id: 'contact' },
+  { href: '#meet-our-team', text: 'Meet Our Team', id: 'meet-our-team', path: '/meet-our-team' },
 ];
 
 export default function Navbar() {
@@ -23,7 +23,16 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const handleNavClick = (href) => {
+  const handleNavClick = (link) => {
+    if (link?.path) {
+      navigate(link.path);
+      setIsMenuOpen(false);
+      return;
+    }
+
+    const href = link?.href;
+    if (!href) return;
+
     const el = document.getElementById(href.replace('#', ''));
     if (el) el.scrollIntoView({ behavior: 'smooth' });
     setIsMenuOpen(false);
@@ -50,13 +59,13 @@ export default function Navbar() {
 
         {/* Desktop nav links */}
         <div className="hidden lg:flex items-center gap-1 flex-1">
-          {navlinks.map(({ id, text, href }) => (
+          {navlinks.map((link) => (
             <button
-              key={id}
-              onClick={() => handleNavClick(href)}
+              key={link.id}
+              onClick={() => handleNavClick(link)}
               className="flex items-center px-3.5 py-2 rounded-lg text-xs font-mono uppercase tracking-wider text-[#7d8590] hover:text-[#c9d1d9] hover:bg-[#161b22] transition-all duration-200"
             >
-              {text}
+              {link.text}
             </button>
           ))}
         </div>
@@ -121,13 +130,13 @@ export default function Navbar() {
               {/* Nav links */}
               <div className="flex-1 p-3 space-y-1">
                 <p className="text-[10px] font-mono uppercase tracking-widest text-[#484f58] px-3 py-2">Navigation</p>
-                {navlinks.map(({ id, text, href }) => (
+                {navlinks.map((link) => (
                   <button
-                    key={id}
-                    onClick={() => handleNavClick(href)}
+                    key={link.id}
+                    onClick={() => handleNavClick(link)}
                     className="w-full flex items-center px-3 py-3 rounded-xl text-xs font-mono uppercase tracking-wider text-[#7d8590] hover:text-[#e6edf3] hover:bg-[#161b22] border border-transparent transition-all"
                   >
-                    {text}
+                    {link.text}
                   </button>
                 ))}
               </div>
