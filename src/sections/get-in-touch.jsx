@@ -7,7 +7,7 @@ export default function GetInTouch() {
     <section className="flex flex-col items-center" id="contact">
       <SectionTitle
         title="Get in touch"
-        description="A visual collection of our most recent works - each piece crafted with intention, emotion, and style."
+        description="Contact us incase of any queries"
       />
       <form
         onSubmit={(e) => e.preventDefault()}

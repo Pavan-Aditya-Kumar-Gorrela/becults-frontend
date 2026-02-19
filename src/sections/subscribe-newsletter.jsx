@@ -6,7 +6,7 @@ export default function SubscribeNewsletter() {
     <section className="flex flex-col items-center">
       <SectionTitle
         title="Common FAQ"
-        description="A visual collection of our most recent works - each piece crafted with intention, emotion, and style."
+        description="A bunch of questions commonly asked by many people"
       />
       <br />
       <FAQ />

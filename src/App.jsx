@@ -1,8 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
-import GetInTouch from './sections/get-in-touch';
 import OurTestimonials from './sections/our-testimonials';
 import SubscribeNewsletter from './sections/subscribe-newsletter';
-import TrustedCompanies from './sections/trusted-companies';
 import Footer from './components/footer';
 import Navbar from './components/navbar';
 import AboutOurApps from './sections/about-our-apps';
@@ -23,6 +21,7 @@ import Home from './pages/Home';
 import Explore from './pages/Explore';
 import CohortDetail from './pages/CohortDetail';
 import NotFoundPage from './pages/404NotFoundPage';
+import MeetOurTeam from './components/meet-our-team';
 import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
 
 function LandingPage() {
@@ -35,8 +34,6 @@ function LandingPage() {
         <OurLatestCreation />
         <AboutOurApps />
         <OurTestimonials />
-        <TrustedCompanies />
-        <GetInTouch />
         <SubscribeNewsletter />
       </main>
       <Footer />
@@ -48,6 +45,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/meet-our-team" element={<MeetOurTeam/>}/>
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />

@@ -35,7 +35,20 @@ export default function AboutOurApps() {
         title="About Us"
         description="A ongoing student community that acts as bridge between college and companies"
       />
+
+      <div className="max-w-3xl px-6 md:px-0 mt-6 text-center text-slate-300 leading-relaxed">
+        <p>
+          Becults is a dynamic student-driven organization committed to fostering innovation,
+          collaboration, and continuous growth. We bring together passionate learners who aspire to
+          develop their skills, expand their knowledge, and create meaningful impact. Through
+          workshops, projects, events, and peer learning initiatives, Becults empowers students to
+          transform ideas into action and ambition into achievement. Our mission is to build a
+          supportive community where collective growth becomes the foundation for leadership,
+          creativity, and excellence.
+        </p>
+      </div>
       <div className="relative max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-8 md:px-0 mt-18">
+        
         {sectionData.map((data, index) => (
           <motion.div
             key={data.title}

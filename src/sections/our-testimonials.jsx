@@ -1,31 +1,39 @@
 import SectionTitle from '../components/section-title';
 import { motion } from 'framer-motion';
+import Vamsi from '../assets/vamsi.jpeg';
+import Anil from '../assets/anil.jpeg';
+import Pavan from '../assets/pavan.jpeg';
+import Mani from '../assets/mani.jpeg';
 
 export default function OurTestimonials() {
   const cardsData = [
     {
       image:
-        'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200',
+        Pavan,
       name: 'Pavan Aditya Kumar Gorrela',
       handle: '@pavanadityakumar',
+      text: 'Becults creates an environment where innovation thrives and every member is empowered to contribute and evolve.'
     },
     {
       image:
-        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200',
+        Vamsi,
       name: 'Vamsi Krishna Sai',
       handle: '@vamsikrishna',
+      text : 'Through Becults, students don’t just gain knowledge; they build confidence, collaboration, and a culture of continuous improvement.'
     },
     {
       image:
-        'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&auto=format&fit=crop&q=60',
+        Anil,
       name: 'Anil Kumar Reddy Kota',
       handle: '@anilreddy',
+      text: 'Student motivation at this stage to learn and grow together is revolutionary; everyone should support this collective growth.'
     },
     {
       image:
-        'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=200&auto=format&fit=crop&q=60',
+        Mani,
       name: 'Manikanta Thirumalla',
       handle: '@manikantathirumalla',
+      text: 'Becults is shaping future leaders by fostering teamwork, skill development, and shared ambition.'
     },
   ];
 
@@ -58,7 +66,7 @@ export default function OurTestimonials() {
         </div>
       </div>
       <p className="text-sm py-4 text-white-800">
-        Radiant made undercutting all of our competitors an absolute breeze.
+        {card.text}
       </p>
     </div>
   );

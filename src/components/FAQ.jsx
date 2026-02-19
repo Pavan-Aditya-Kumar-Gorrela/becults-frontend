@@ -4,24 +4,24 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: 'How to use this component?',
+      question: 'What is Becults?',
       answer:
-        "To use this component, you need to import it in your project and use it in your JSX code. Here's an example of how to use it:",
+        "Becults is a platform for students to learn and grow together. It is a growing community of students who are tech enthusiasts.",
     },
     {
-      question: 'Are there any other components available?',
+      question: 'Who is founder of Becults?',
       answer:
-        "Yes, there are many other components available in this library. You can find them in the 'Components' section of the website.",
+        "Becults is maintained by a group of engineering students who want to contribute and grow together.",
     },
     {
-      question: 'Are components responsive?',
+      question: 'I am a beginner, can I join Becults?',
       answer:
-        'Yes, all components are responsive and can be used on different screen sizes.',
+        'Yes, you can join Becults. We have a community of students who are willing to help you learn and grow.',
     },
     {
-      question: 'Can I customize the components?',
+      question: 'Is becults is a paid platform?',
       answer:
-        "Yes, you can customize the components by passing props to them. You can find more information about customizing components in the 'Customization' section of the website.",
+        "Becults is a cohort style learning platform consists of both free and paid cohorts with affordable price.",
     },
   ];
   return (
@@ -42,10 +42,7 @@ const FAQ = () => {
         <div>
           <p className="text-indigo-600 text-sm font-medium">FAQ's</p>
           <h1 className="text-3xl font-semibold">Looking for answer?</h1>
-          <p className="text-sm text-slate-500 mt-2 pb-4">
-            Ship Beautiful Frontends Without the Overhead — Customizable,
-            Scalable and Developer-Friendly UI Components.
-          </p>
+          
           {faqs.map((faq, index) => (
             <div
               className="border-b border-slate-200 py-4 cursor-pointer"
